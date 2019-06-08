@@ -49,18 +49,22 @@
                         ->data_bind('value: id, attr: {name: \'codes[\' + $index() + \'][id]\'}')
                     !!}
                     <div class="col-md-4">
-                        {!! Former::text()
-                            ->label('')
-                            ->data_bind('value: code, attr: {name: \'codes[\' + $index() + \'][code]\'}')
-                            ->required()
-                        !!}
+                        <div class="form-group required">
+                            <div class="col-lg-12 col-sm-12">
+                                <input class="form-control" 
+                                    data-bind="value: code, attr: {name: 'codes[' + $index() + '][code]'}" 
+                                    required type="text">
+                            </div>
+                        </div>                         
                     </div>
                     <div class="col-md-6">
-                        {!! Former::text()
-                            ->label('') 
-                            ->data_bind('value: description, attr: {name: \'codes[\' + $index() + \'][description]\'}')
-                            ->required()
-                        !!}
+                        <div class="form-group required">
+                            <div class="col-lg-12 col-sm-12">
+                                <input class="form-control" 
+                                    data-bind="value: description, attr: {name: 'codes[' + $index() + '][description]'}" 
+                                    required type="text">
+                            </div>
+                        </div>                        
                     </div>
                     <div class="col-md-2">
                         {!! Button::danger()
