@@ -23,7 +23,6 @@ Thumbs.db
 /error_log
 /auth.json
 /public/error_log
-/Modules
 
 /ninja.sublime-project
 /ninja.sublime-workspace
@@ -41,3 +40,7 @@ tests/_support/_generated/
 _ide_helper.php
 storage/version.txt
 storage/framework/.DS_Store
+
+public/
+storage/
+package-lock.json

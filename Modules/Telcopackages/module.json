@@ -1,0 +1,18 @@
+{
+    "name": "Telcopackages",
+    "alias": "telcopackages",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\Telcopackages\\Providers\\TelcopackagesServiceProvider"
+    ],
+    "aliases":{},
+    "files": [
+        "start.php"
+    ],
+    "icon": "th-large",
+    "plural": "telcopackages",
+    "no-sidebar": 1
+}

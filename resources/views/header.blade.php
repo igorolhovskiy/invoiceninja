@@ -408,6 +408,8 @@
                 'dashboard',
                 'clients',
                 'products',
+                'telcopackages',
+                'telcorates',
                 'invoices',
                 'payments',
                 'recurring_invoices',

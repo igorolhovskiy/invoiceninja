@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Http\Requests;
+namespace Modules\Telcorates\Http\Requests;
 
-use App\Libraries\HistoryUtils;
 use App\Models\EntityModel;
+use App\Http\Requests\EntityRequest;
 use Input;
 use Utils;
 
-class EntityRequest extends Request
+class TelcoratesRequest extends EntityRequest
 {
-    protected $entityType;
-    private $entity;
+    protected $entityType = 'telcorates';
 
     public function entity()
     {
@@ -22,7 +21,7 @@ class EntityRequest extends Request
 
         // The entity id can appear as invoices, invoice_id, public_id or id
         $publicId = false;
-        $field = $this->entityType . '_id';
+        $field = 'telcorate';
 
         if (! empty($this->$field)) {
             $publicId = $this->$field;
@@ -50,28 +49,5 @@ class EntityRequest extends Request
         }
 
         return $this->entity;
-    }
-
-    public function setEntity($entity)
-    {
-        $this->entity = $entity;
-    }
-
-    public function authorize()
-    {
-        if ($this->entity()) {
-            if ($this->user()->can('view', $this->entity())) {
-                HistoryUtils::trackViewed($this->entity());
-
-                return true;
-            }
-        } else {
-            return $this->user()->can('create', $this->entityType);
-        }
-    }
-
-    public function rules()
-    {
-        return [];
-    }
+    }     
 }
