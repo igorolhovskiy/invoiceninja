@@ -214,6 +214,9 @@
 						<li role="presentation">
 							<a href="#classify" aria-controls="classify" role="tab" data-toggle="tab">{{ trans('texts.classify') }}</a>
 						</li>
+						<li role="presentation">
+							<a href="#consertis" aria-controls="consertis" role="tab" data-toggle="tab">{{ trans('texts.consertis_additional_data') }}</a>
+						</li>						
 					</ul>
 				</div>
 				<div class="tab-content" style="padding-top:24px;">
@@ -262,6 +265,16 @@
 							->fromQuery($sizes, 'name', 'id') !!}
 						{!! Former::select('industry_id')->addOption('','')
 							->fromQuery($industries, 'name', 'id') !!}
+					</div>
+					<div role="tabpanel" class="tab-pane" id="consertis">
+						{!! Former::number('astpp_client_id')->label('astpp_client_id') !!}
+						{!! Former::text('colt_dids')->label('colt_did_list') !!}
+						{!! Former::number('call_cost_limit')->step('any')->label('call_cost_limit') !!}
+						{!! Former::text('crm_code')->label('crm_code') !!}
+
+						{!! Former::text('iban')->label('iban') !!}
+						{!! Former::text('bic')->label('bic') !!}
+						{!! Former::text('sepa')->label('sepa') !!}
 					</div>
 				</div>
 		</div>

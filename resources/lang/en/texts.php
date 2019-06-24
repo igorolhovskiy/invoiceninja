@@ -3144,7 +3144,14 @@ $LANG = array(
     'design' => 'Design',
     'password_is_too_short' => 'Password is too short',
     'failed_to_find_record' => 'Failed to find record',
-
+    'consertis_additional_data' => 'Consertis Additional Data',
+    'astpp_client_id' => 'ASTPP Client ID',
+    'colt_did_list' => 'Colt DID list',
+    'call_cost_limit' => 'Call Cost Limit',
+    'crm_code' => 'CRM Code (TCN)',
+    'iban' => 'IBAN',
+    'bic' => 'BIC',
+    'sepa' => 'SEPA',
 );
 
 return $LANG;

@@ -128,6 +128,7 @@
                 ->appendIcon(Icon::create('remove-circle')) !!}
 
         {!! Button::success(trans('texts.save'))
+                ->withAttributes(['id' =>'formSubmitButton'])
                 ->submit()
                 ->large()
                 ->appendIcon(Icon::create('floppy-disk')) !!}
@@ -142,6 +143,13 @@
         $(function() {
             $(".warn-on-exit input").first().focus();
         })
+
+        $('form').submit(function() {
+            $('#formSubmitButton')
+                .prop("disabled", true)
+                .text('Saving...');
+            return true;
+        });
 
         const codes = @if ($telcorates) {!! $telcorates->codes !!} @else null @endif;
 

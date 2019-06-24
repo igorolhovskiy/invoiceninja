@@ -64,6 +64,13 @@ class Client extends EntityModel
         'show_tasks_in_portal',
         'send_reminders',
         'custom_messages',
+        'astpp_client_id',
+        'colt_dids',
+        'call_cost_limit',
+        'crm_code',
+        'iban',
+        'bic',
+        'sepa',
     ];
 
     /**
