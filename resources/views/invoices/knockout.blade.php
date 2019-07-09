@@ -199,6 +199,13 @@ function ViewModel(data) {
         }
         return false;
     });
+
+    // set required attribut to client field
+    if (self.invoice().invoice_category_id() === '1') {
+        $('.client-input').attr('required', true);
+    } else {
+        $('.client-input').attr('required', false);
+    }
 }
 
 function InvoiceModel(data) {
@@ -263,6 +270,8 @@ function InvoiceModel(data) {
     self.custom_taxes2 = ko.observable(false);
     self.custom_text_value1 = ko.observable();
     self.custom_text_value2 = ko.observable();
+
+    self.invoice_category_id = ko.observable(1);
 
     self.invoice_items_with_tasks = ko.observableArray();
     self.invoice_items_without_tasks = ko.observableArray();
@@ -654,6 +663,14 @@ function InvoiceModel(data) {
         }
         return self.isPartialSet();
     });
+
+    self.invoiceCategoryIdChanged = function(obj, event) {
+        if (self.invoice_category_id() === '1') {
+            $('.client-input').attr('required', true);
+        } else {
+            $('.client-input').attr('required', false);
+        }
+    }
 }
 
 function ClientModel(data) {
@@ -827,6 +844,7 @@ function ContactModel(data) {
 function ItemModel(data) {
     var self = this;
     self.product_key = ko.observable('');
+    self.product_type = ko.observable('');
     self.notes = ko.observable('');
     self.cost = ko.observable(0);
     self.qty = ko.observable({{ $account->hasInvoiceField('product', 'product.quantity') ? 0 : 1 }});
@@ -1049,7 +1067,8 @@ ko.bindingHandlers.productTypeahead = {
             @else
                 templates: {
                     suggestion: function(item) { return '<div title="' + _.escape(item.notes) + '" style="border-bottom: solid 1px #CCC">'
-                        + _.escape(item.product_key) + '</div>' }
+                        + _.escape(item.product_key) 
+                        + '<div class="pull-right text-muted">' + _.escape(item.product_type) + '</div></div>' }
                 },
                 source: searchData(allBindings.items, allBindings.key),
             @endif
@@ -1059,6 +1078,9 @@ ko.bindingHandlers.productTypeahead = {
                 if (model.expense_public_id()) {
                     return;
                 }
+                
+                model.product_type(datum.product_type);
+
                 if (datum.notes && (! model.notes() || ! model.isTask())) {
                     model.notes(datum.notes);
                 }

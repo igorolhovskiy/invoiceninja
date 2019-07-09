@@ -98,6 +98,12 @@ class Invoice extends EntityModel implements BalanceAffecting
         INVOICE_STATUS_PAID => 'success',
     ];
 
+    public static $invoiceCategories = [
+        INVOICE_ITEM_CATEGORY_ORDINARY => 'Ordinary',
+        INVOICE_ITEM_CATEGORY_COLT => 'Colt',
+        INVOICE_ITEM_CATEGORY_ASTPP => 'ASTPP',
+    ];
+
     /**
      * @return array
      */
@@ -1625,6 +1631,14 @@ class Invoice extends EntityModel implements BalanceAffecting
         }
 
         return false;
+    }
+
+    public static function getInvoiceCategory($invoiceCategoryId) {
+        if (isset(static::$invoiceCategories[$invoiceCategoryId])) {
+            return static::$invoiceCategories[$invoiceCategoryId];
+        }
+
+        return '';
     }
 }
 

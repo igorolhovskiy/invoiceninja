@@ -26,6 +26,13 @@ class Telcorates extends EntityModel
      */
     protected $table = 'telcorates';
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['product_type', 'product_key'];
+
     public function getEntityType()
     {
         return 'telcorates';
@@ -34,5 +41,23 @@ class Telcorates extends EntityModel
     public function codes()
     {
         return $this->hasMany('Modules\Telcorates\Models\TelcorateCode', 'telcorate_id');
+    }
+
+    public function getProductTypeAttribute() {
+        return 'telcorates';
+    }
+    
+    public function getProductKeyAttribute() {
+        return $this->attributes['name'];
+    }
+    
+    /**
+     * @param $key
+     *
+     * @return mixed
+     */
+    public static function findProductByKey($key)
+    {
+        return self::scope()->where('name', '=', $key)->first();
     }    
 }

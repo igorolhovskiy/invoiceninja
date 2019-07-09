@@ -29,6 +29,12 @@ class RecurringInvoiceDatatable extends EntityDatatable
                 },
             ],
             [
+                'invoice_category_id',
+                function ($model) {
+                    return Invoice::getInvoiceCategory($model->invoice_category_id);
+                },
+            ],            
+            [
                 'client_name',
                 function ($model) {
                     return link_to("clients/{$model->client_public_id}", Utils::getClientDisplayName($model))->toHtml();

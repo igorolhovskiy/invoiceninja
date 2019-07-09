@@ -18,6 +18,9 @@ use App\Models\Product;
 use App\Models\Task;
 use App\Models\GatewayType;
 use App\Services\PaymentService;
+use Modules\Telcopackages\Models\Telcopackages;
+use Modules\Telcorates\Models\Telcorates;
+
 use Auth;
 use DB;
 use Utils;
@@ -91,7 +94,8 @@ class InvoiceRepository extends BaseRepository
                 'invoices.user_id',
                 'invoices.is_public',
                 'invoices.is_recurring',
-                'invoices.private_notes'
+                'invoices.private_notes',
+                'invoices.invoice_category_id'
             );
 
         $this->applyFilters($query, $entityType, ENTITY_INVOICE);
@@ -181,7 +185,8 @@ class InvoiceRepository extends BaseRepository
                         'invoices.due_date as due_date_sql',
                         'invoices.is_recurring',
                         'invoices.quote_invoice_id',
-                        'invoices.private_notes'
+                        'invoices.private_notes',
+                        'invoices.invoice_category_id'
                     );
 
         if ($clientPublicId) {
@@ -627,6 +632,10 @@ class InvoiceRepository extends BaseRepository
             $total += $invoice->custom_value2;
         }
 
+        if (isset($data['invoice_category_id'])) {
+            $invoice->invoice_category_id = $data['invoice_category_id'];
+        }
+
         if (! $account->inclusive_taxes) {
             $taxAmount1 = round($total * ($invoice->tax_rate1 ? $invoice->tax_rate1 : 0) / 100, 2);
             $taxAmount2 = round($total * ($invoice->tax_rate2 ? $invoice->tax_rate2 : 0) / 100, 2);
@@ -731,7 +740,17 @@ class InvoiceRepository extends BaseRepository
                         && ! $invoice->has_expenses
                         && ! in_array($productKey, Utils::trans(['surcharge', 'discount', 'fee', 'gateway_fee_item']))
                     ) {
-                        $product = Product::findProductByKey($productKey);
+                        switch ($item['product_type']) {
+                            case 'telcopackages':
+                                $product = Telcopackages::findProductByKey($productKey);
+                                break;
+                            case 'telcorates':
+                                $product = Telcorates::findProductByKey($productKey);
+                                break;
+                            default:
+                                $product = Product::findProductByKey($productKey);
+                        }
+
                         if (! $product) {
                             if (Auth::user()->can('create', ENTITY_PRODUCT)) {
                                 $product = Product::createNew();
@@ -741,16 +760,18 @@ class InvoiceRepository extends BaseRepository
                             }
                         }
                         if ($product && (Auth::user()->can('edit', $product))) {
-                            $product->notes = ($task || $expense) ? '' : $item['notes'];
-                            if (! $account->convert_products) {
-                                $product->cost = $expense ? 0 : Utils::parseFloat($item['cost']);
+                            if ($item['product_type'] === ENTITY_PRODUCT) {
+                                $product->notes = ($task || $expense) ? '' : $item['notes'];
+                                if (! $account->convert_products) {
+                                    $product->cost = $expense ? 0 : Utils::parseFloat($item['cost']);
+                                }
+                                $product->tax_name1 = isset($item['tax_name1']) ? $item['tax_name1'] : null;
+                                $product->tax_rate1 = isset($item['tax_rate1']) ? $item['tax_rate1'] : 0;
+                                $product->tax_name2 = isset($item['tax_name2']) ? $item['tax_name2'] : null;
+                                $product->tax_rate2 = isset($item['tax_rate2']) ? $item['tax_rate2'] : 0;
+                                $product->custom_value1 = isset($item['custom_value1']) ? $item['custom_value1'] : null;
+                                $product->custom_value2 = isset($item['custom_value2']) ? $item['custom_value2'] : null;
                             }
-                            $product->tax_name1 = isset($item['tax_name1']) ? $item['tax_name1'] : null;
-                            $product->tax_rate1 = isset($item['tax_rate1']) ? $item['tax_rate1'] : 0;
-                            $product->tax_name2 = isset($item['tax_name2']) ? $item['tax_name2'] : null;
-                            $product->tax_rate2 = isset($item['tax_rate2']) ? $item['tax_rate2'] : 0;
-                            $product->custom_value1 = isset($item['custom_value1']) ? $item['custom_value1'] : null;
-                            $product->custom_value2 = isset($item['custom_value2']) ? $item['custom_value2'] : null;
                             $product->save();
                         }
                     }
@@ -761,6 +782,7 @@ class InvoiceRepository extends BaseRepository
             $invoiceItem->fill($item);
             $invoiceItem->product_id = isset($product) ? $product->id : null;
             $invoiceItem->product_key = isset($item['product_key']) ? (trim($invoice->is_recurring ? $item['product_key'] : Utils::processVariables($item['product_key']))) : '';
+            $invoiceItem->product_type = isset($item['product_type']) ? $item['product_type'] : ENTITY_PRODUCT;
             $invoiceItem->notes = trim($invoice->is_recurring ? $item['notes'] : Utils::processVariables($item['notes']));
             $invoiceItem->cost = Utils::parseFloat($item['cost']);
             $invoiceItem->qty = Utils::parseFloat($item['qty']);

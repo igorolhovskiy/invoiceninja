@@ -3152,6 +3152,10 @@ $LANG = array(
     'iban' => 'IBAN',
     'bic' => 'BIC',
     'sepa' => 'SEPA',
+    'invoice_category_id' => 'Type',
+    'invoice_category_ordinary' => 'Ordinary',
+    'invoice_category_colt' => 'Colt',
+    'invoice_category_astpp' => 'ASTPP',
 );
 
 return $LANG;

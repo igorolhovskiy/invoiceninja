@@ -76,6 +76,10 @@ if (! defined('APP_NAME')) {
     define('INVOICE_ITEM_TYPE_PAID_GATEWAY_FEE', 4);
     define('INVOICE_ITEM_TYPE_LATE_FEE', 5);
 
+    define('INVOICE_ITEM_CATEGORY_ORDINARY', 1);
+    define('INVOICE_ITEM_CATEGORY_COLT', 2);
+    define('INVOICE_ITEM_CATEGORY_ASTPP', 3);
+
     define('PERSON_CONTACT', 'contact');
     define('PERSON_USER', 'user');
     define('PERSON_VENDOR_CONTACT', 'vendorcontact');

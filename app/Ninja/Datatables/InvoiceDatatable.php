@@ -31,6 +31,12 @@ class InvoiceDatatable extends EntityDatatable
                 },
             ],
             [
+                'invoice_category_id',
+                function ($model) {
+                    return Invoice::getInvoiceCategory($model->invoice_category_id);
+                },
+            ],            
+            [
                 'client_name',
                 function ($model) {
                     if(Auth::user()->can('view', [ENTITY_CLIENT, $model]))

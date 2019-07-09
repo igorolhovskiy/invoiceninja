@@ -39,6 +39,13 @@ class Product extends EntityModel
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['product_type'];
+
+    /**
      * @return array
      */
     public static function getImportColumns()
@@ -90,5 +97,9 @@ class Product extends EntityModel
     public function user()
     {
         return $this->belongsTo('App\Models\User')->withTrashed();
+    }
+
+    public function getProductTypeAttribute() {
+        return $this->getEntityType();
     }
 }

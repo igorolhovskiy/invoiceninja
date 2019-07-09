@@ -15,6 +15,9 @@ use App\Models\InvoiceDesign;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\TaxRate;
+use Modules\Telcopackages\Models\Telcopackages;
+use Modules\Telcorates\Models\Telcorates;
+
 use App\Ninja\Datatables\InvoiceDatatable;
 use App\Ninja\Repositories\ClientRepository;
 use App\Ninja\Repositories\DocumentRepository;
@@ -315,11 +318,26 @@ class InvoiceController extends BaseController
                 $taxRateOptions[$key] = $rate['name'] . ' ' . $rate['rate'] . '%';
             }
         }
+        $products = Product::scope()->orderBy('product_key')->get();
 
+        $telcopackages = Telcopackages::scope()->orderBy('name')->get();
+
+        $telcorates = Telcorates::scope()->orderBy('name')->get();
+
+        $products = $products->merge($telcopackages)->merge($telcorates);
+
+        $invoiceCategories = [
+            INVOICE_ITEM_CATEGORY_ORDINARY => Invoice::$invoiceCategories[INVOICE_ITEM_CATEGORY_ORDINARY]
+        ];
+        if ($invoice->is_recurring) {
+            $invoiceCategories[INVOICE_ITEM_CATEGORY_ASTPP] = Invoice::$invoiceCategories[INVOICE_ITEM_CATEGORY_ASTPP];
+        } else  {
+            $invoiceCategories[INVOICE_ITEM_CATEGORY_COLT] = Invoice::$invoiceCategories[INVOICE_ITEM_CATEGORY_COLT];
+        }
         return [
             'data' => Input::old('data'),
             'account' => Auth::user()->account->load('country'),
-            'products' => Product::scope()->orderBy('product_key')->get(),
+            'products' => $products,
             'taxRateOptions' => $taxRateOptions,
             'sizes' => Cache::get('sizes'),
             'invoiceDesigns' => InvoiceDesign::getDesigns(),
@@ -332,6 +350,7 @@ class InvoiceController extends BaseController
             'tasks' => Session::get('tasks') ? Session::get('tasks') : null,
             'expenseCurrencyId' => Session::get('expenseCurrencyId') ?: null,
             'expenses' => Expense::scope(Session::get('expenses'))->with('documents', 'expense_category')->get(),
+            'invoiceCategories' => $invoiceCategories,
         ];
     }
 

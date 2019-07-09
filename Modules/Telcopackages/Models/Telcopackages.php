@@ -26,6 +26,13 @@ class Telcopackages extends EntityModel
      */
     protected $table = 'telcopackages';
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['product_type', 'product_key'];
+
     public function getEntityType()
     {
         return 'telcopackages';
@@ -35,4 +42,26 @@ class Telcopackages extends EntityModel
     {
         return $this->hasMany('Modules\Telcopackages\Models\TelcopackageCode', 'telcopackage_id');
     }
+
+    public function getProductTypeAttribute() {
+        return 'telcopackages';
+    }
+    
+    public function getProductKeyAttribute() {
+        return $this->attributes['name'];
+    }
+    
+    public function setProductKeyAttribute($value) {
+        $this->attributes['name'] = $value;
+    }
+
+    /**
+     * @param $key
+     *
+     * @return mixed
+     */
+    public static function findProductByKey($key)
+    {
+        return self::scope()->where('name', '=', $key)->first();
+    }    
 }

@@ -108,90 +108,102 @@
 
     <div class="row" style="min-height:195px" onkeypress="formEnterClick(event)">
     	<div class="col-md-4" id="col_1">
+			<div data-bind="visible: invoice_category_id() === '1'">
+				@if ($invoice->id || $data)
+					<div class="form-group">
+						<label for="client" class="control-label col-lg-4 col-sm-4"><b>{{ trans('texts.client') }}</b></label>
+						<div class="col-lg-8 col-sm-8">
+							<h4>
+								<span data-bind="text: getClientDisplayName(ko.toJS(client()))"></span>
+								@if ($invoice->client->is_deleted)
+									&nbsp;&nbsp;<div class="label label-danger">{{ trans('texts.deleted') }}</div>
+								@endif
+							</h4>
 
-    		@if ($invoice->id || $data)
-				<div class="form-group">
-					<label for="client" class="control-label col-lg-4 col-sm-4"><b>{{ trans('texts.client') }}</b></label>
-					<div class="col-lg-8 col-sm-8">
-                        <h4>
-                            <span data-bind="text: getClientDisplayName(ko.toJS(client()))"></span>
-                            @if ($invoice->client->is_deleted)
-                                &nbsp;&nbsp;<div class="label label-danger">{{ trans('texts.deleted') }}</div>
-                            @endif
-                        </h4>
+							@can('view', $invoice->client)
+								@can('edit', $invoice->client)
+									<a id="editClientLink" class="pointer" data-bind="click: $root.showClientForm">{{ trans('texts.edit_client') }}</a> |
+								@endcan
+								{!! link_to('/clients/'.$invoice->client->public_id, trans('texts.view_client'), ['target' => '_blank']) !!}
+							@endcan
+						</div>
+					</div>
+					<div style="display:none">
+				@endif
 
-                        @can('view', $invoice->client)
-                            @can('edit', $invoice->client)
-                                <a id="editClientLink" class="pointer" data-bind="click: $root.showClientForm">{{ trans('texts.edit_client') }}</a> |
-                            @endcan
-                            {!! link_to('/clients/'.$invoice->client->public_id, trans('texts.view_client'), ['target' => '_blank']) !!}
-                        @endcan
+				{!! Former::select('client')
+						->addOption('', '')
+						->data_bind("dropdown: client, 
+							dropdownOptions: {highlighter: comboboxHighlighter}")
+						->addClass('client-input')
+						->addGroupClass('client_select closer-row') !!}
+
+				<div class="form-group" style="margin-bottom: 8px">
+					<div class="col-lg-8 col-sm-8 col-lg-offset-4 col-sm-offset-4">
+						@can('create', $invoice->client)
+						<a id="createClientLink" class="pointer" data-bind="click: $root.showClientForm, html: $root.clientLinkText"></a>
+						@endcan
+						<span data-bind="visible: $root.invoice().client().public_id() > 0" style="display:none">|
+							<a data-bind="attr: {href: '{{ url('/clients') }}/' + $root.invoice().client().public_id()}" target="_blank">{{ trans('texts.view_client') }}</a>
+						</span>
 					</div>
 				</div>
-				<div style="display:none">
-    		@endif
 
-            {!! Former::select('client')
-					->addOption('', '')
-					->data_bind("dropdown: client, dropdownOptions: {highlighter: comboboxHighlighter}")
-					->addClass('client-input')
-					->addGroupClass('client_select closer-row') !!}
+				@if ($invoice->id || $data)
+					</div>
+				@endif
 
-			<div class="form-group" style="margin-bottom: 8px">
-				<div class="col-lg-8 col-sm-8 col-lg-offset-4 col-sm-offset-4">
-					@can('create', $invoice->client)
-					<a id="createClientLink" class="pointer" data-bind="click: $root.showClientForm, html: $root.clientLinkText"></a>
-					@endcan
-                    <span data-bind="visible: $root.invoice().client().public_id() > 0" style="display:none">|
-                        <a data-bind="attr: {href: '{{ url('/clients') }}/' + $root.invoice().client().public_id()}" target="_blank">{{ trans('texts.view_client') }}</a>
-                    </span>
-				</div>
-			</div>
-
-			@if ($invoice->id || $data)
-				</div>
-			@endif
-
-			<div data-bind="with: client" class="invoice-contact">
-				<div style="display:none" class="form-group" data-bind="visible: contacts().length > 0, foreach: contacts">
-					<div class="col-lg-8 col-lg-offset-4 col-sm-offset-4">
-						<label class="checkbox" data-bind="attr: {for: $index() + '_check'}, visible: email.display" onclick="refreshPDF(true)">
-                            <input type="hidden" value="0" data-bind="attr: {name: 'client[contacts][' + $index() + '][send_invoice]'}">
-							<input type="checkbox" value="1" data-bind="visible: email() || first_name() || last_name(), checked: send_invoice, attr: {id: $index() + '_check', name: 'client[contacts][' + $index() + '][send_invoice]'}">
-							<span data-bind="visible: first_name || last_name">
-								<span data-bind="text: (first_name() || '') + ' ' + (last_name() || '')"></span>
-								<br/>
-							</span>
-							<span data-bind="visible: email">
-								<span data-bind="text: email"></span>
-								<br/>
-							</span>
-                        </label>
-                        @if ( ! $invoice->is_deleted && ! $invoice->client->is_deleted)
-                        <span data-bind="visible: !$root.invoice().is_recurring()">
-                            <span data-bind="html: $data.view_as_recipient"></span>&nbsp;&nbsp;
-                            @if (Utils::isConfirmed())
-	                            <span style="vertical-align:text-top;color:red" class="fa fa-exclamation-triangle"
-	                                    data-bind="visible: $data.email_error, tooltip: {title: $data.email_error}"></span>
-	                            <span style="vertical-align:text-top;padding-top:2px" class="fa fa-info-circle"
-	                                    data-bind="visible: $data.invitation_status, tooltip: {title: $data.invitation_status, html: true},
-	                                    style: {color: $data.info_color}"></span>
-								<span class="signature-wrapper">&nbsp;
-								<span style="vertical-align:text-top;color:#888" class="fa fa-user"
-	                                    data-bind="visible: $data.invitation_signature_svg, tooltip: {title: $data.invitation_signature_svg, html: true}"></span>
+				<div data-bind="with: client" class="invoice-contact">
+					<div style="display:none" class="form-group" data-bind="visible: contacts().length > 0, foreach: contacts">
+						<div class="col-lg-8 col-lg-offset-4 col-sm-offset-4">
+							<label class="checkbox" data-bind="attr: {for: $index() + '_check'}, visible: email.display" onclick="refreshPDF(true)">
+								<input type="hidden" value="0" data-bind="attr: {name: 'client[contacts][' + $index() + '][send_invoice]'}">
+								<input type="checkbox" value="1" data-bind="visible: email() || first_name() || last_name(), checked: send_invoice, attr: {id: $index() + '_check', name: 'client[contacts][' + $index() + '][send_invoice]'}">
+								<span data-bind="visible: first_name || last_name">
+									<span data-bind="text: (first_name() || '') + ' ' + (last_name() || '')"></span>
+									<br/>
 								</span>
-                            @endif
-                        </span>
-                        @endif
+								<span data-bind="visible: email">
+									<span data-bind="text: email"></span>
+									<br/>
+								</span>
+							</label>
+							@if ( ! $invoice->is_deleted && ! $invoice->client->is_deleted)
+							<span data-bind="visible: !$root.invoice().is_recurring()">
+								<span data-bind="html: $data.view_as_recipient"></span>&nbsp;&nbsp;
+								@if (Utils::isConfirmed())
+									<span style="vertical-align:text-top;color:red" class="fa fa-exclamation-triangle"
+											data-bind="visible: $data.email_error, tooltip: {title: $data.email_error}"></span>
+									<span style="vertical-align:text-top;padding-top:2px" class="fa fa-info-circle"
+											data-bind="visible: $data.invitation_status, tooltip: {title: $data.invitation_status, html: true},
+											style: {color: $data.info_color}"></span>
+									<span class="signature-wrapper">&nbsp;
+									<span style="vertical-align:text-top;color:#888" class="fa fa-user"
+											data-bind="visible: $data.invitation_signature_svg, tooltip: {title: $data.invitation_signature_svg, html: true}"></span>
+									</span>
+								@endif
+							</span>
+							@endif
+						</div>
 					</div>
 				</div>
 			</div>
-
+			{!! Former::select('invoice_category_id')
+				->options($invoiceCategories)
+				->disabled($invoice->id ? true : false)
+				->data_bind("value: invoice_category_id, 
+					event:{ change: invoiceCategoryIdChanged}")
+			!!}
+			<span data-bind="text: id"></span>
 		</div>
 		<div class="col-md-4" id="col_2">
 			<div data-bind="visible: !is_recurring()">
-				{!! Former::text('invoice_date')->data_bind("datePicker: invoice_date, valueUpdate: 'afterkeydown'")->label($account->getLabel("{$entityType}_date"))
-							->data_date_format(Session::get(SESSION_DATE_PICKER_FORMAT, DEFAULT_DATE_PICKER_FORMAT))->appendIcon('calendar')->addGroupClass('invoice_date') !!}
+				<div data-bind="visible: invoice_category_id() === '1'">
+					{!! Former::text('invoice_date')
+						->data_bind("datePicker: invoice_date, valueUpdate: 'afterkeydown'")
+						->label($account->getLabel("{$entityType}_date"))
+						->data_date_format(Session::get(SESSION_DATE_PICKER_FORMAT, DEFAULT_DATE_PICKER_FORMAT))->appendIcon('calendar')->addGroupClass('invoice_date') !!}
+				</div>
 				{!! Former::text('due_date')->data_bind("datePicker: due_date, valueUpdate: 'afterkeydown'")->label($account->getLabel($invoice->getDueDateLabel()))
 							->placeholder($invoice->id || $invoice->isQuote() ? ' ' : $account->present()->dueDatePlaceholder())
 							->data_date_format(Session::get(SESSION_DATE_PICKER_FORMAT, DEFAULT_DATE_PICKER_FORMAT))->appendIcon('calendar')->addGroupClass('due_date') !!}
@@ -237,7 +249,7 @@
 		</div>
 
 		<div class="col-md-4" id="col_2">
-            <span data-bind="visible: !is_recurring()">
+            <span data-bind="visible: !is_recurring() && invoice_category_id() === '1'">
             {!! Former::text('invoice_number')
                         ->label(trans("texts.{$entityType}_number_short"))
                         ->onchange('checkInvoiceNumber()')
@@ -530,11 +542,12 @@
 		@endif
 
         @if ( $invoice->id && ! $invoice->is_recurring)
+			<span data-bind="visible: invoice_category_id() === '1'">		
 		    {!! Button::primary(trans('texts.download'))
                     ->withAttributes(['onclick' => 'onDownloadClick()', 'id' => 'downloadPdfButton'])
                     ->appendIcon(Icon::create('download-alt')) !!}
+			</span>
         @endif
-
         @if (Auth::user()->canCreateOrEdit(ENTITY_INVOICE, $invoice))
             @if ($invoice->isClientTrashed())
                 <!-- do nothing -->
@@ -550,9 +563,14 @@
 					@else
 						{!! Button::normal(trans("texts.save_draft"))->withAttributes(array('id' => 'draftButton', 'onclick' => 'onSaveDraftClick()'))->appendIcon(Icon::create('floppy-disk')) !!}
 						@if (! $invoice->trashed())
-							{!! Button::success(trans($invoice->is_recurring ? "texts.mark_ready" : "texts.mark_sent"))->withAttributes(array('id' => 'saveButton', 'onclick' => 'onMarkSentClick()'))->appendIcon(Icon::create('globe')) !!}
+							<span data-bind="visible: invoice_category_id() === '1'">
+							{!! Button::success(trans($invoice->is_recurring ? "texts.mark_ready" : "texts.mark_sent"))
+								->withAttributes(array('id' => 'saveButton', 'onclick' => 'onMarkSentClick()'))
+								->appendIcon(Icon::create('globe')) !!}
+							</span>
 						@endif
 					@endif
+					<span data-bind="visible: invoice_category_id() === '1'">
 					@if (! $invoice->trashed())
 						{!! Button::info(trans("texts.email_{$entityType}"))->withAttributes(array('id' => 'emailButton', 'onclick' => 'onEmailClick()'))->appendIcon(Icon::create('send')) !!}
 					@endif
@@ -563,6 +581,7 @@
 					@elseif (! empty($tasks))
 						{!! Button::normal(trans('texts.add_product'))->withAttributes(['id' => 'addItemButton', 'onclick' => 'onAddItemClick()'])->appendIcon(Icon::create('plus-sign')) !!}
                     @endif
+					</span>
         	    @endif
                 @if ($invoice->trashed())
                     {!! Button::primary(trans('texts.restore'))->withAttributes(['onclick' => 'submitBulkAction("restore")'])->appendIcon(Icon::create('cloud-download')) !!}
@@ -1531,6 +1550,9 @@
     }
 
 	function isSaveValid() {
+		if (model.invoice().invoice_category_id() !== '1') {
+			return true;
+		}
 		var isValid = model.invoice().client().name() ? true : false;
 		for (var i=0; i<model.invoice().client().contacts().length; i++) {
 			var contact = model.invoice().client().contacts()[i];
