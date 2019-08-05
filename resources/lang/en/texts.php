@@ -3156,6 +3156,7 @@ $LANG = array(
     'invoice_category_ordinary' => 'Ordinary',
     'invoice_category_colt' => 'Colt',
     'invoice_category_astpp' => 'ASTPP',
+    'process_invoice' => 'Process invoices',
 );
 
 return $LANG;

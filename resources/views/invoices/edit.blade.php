@@ -108,7 +108,7 @@
 
     <div class="row" style="min-height:195px" onkeypress="formEnterClick(event)">
     	<div class="col-md-4" id="col_1">
-			<div data-bind="visible: invoice_category_id() === '1'">
+			<div>
 				@if ($invoice->id || $data)
 					<div class="form-group">
 						<label for="client" class="control-label col-lg-4 col-sm-4"><b>{{ trans('texts.client') }}</b></label>
@@ -191,8 +191,7 @@
 			{!! Former::select('invoice_category_id')
 				->options($invoiceCategories)
 				->disabled($invoice->id ? true : false)
-				->data_bind("value: invoice_category_id, 
-					event:{ change: invoiceCategoryIdChanged}")
+				->data_bind("value: invoice_category_id")
 			!!}
 			<span data-bind="text: id"></span>
 		</div>
@@ -1550,9 +1549,6 @@
     }
 
 	function isSaveValid() {
-		if (model.invoice().invoice_category_id() !== '1') {
-			return true;
-		}
 		var isValid = model.invoice().client().name() ? true : false;
 		for (var i=0; i<model.invoice().client().contacts().length; i++) {
 			var contact = model.invoice().client().contacts()[i];

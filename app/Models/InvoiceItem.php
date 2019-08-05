@@ -35,6 +35,7 @@ class InvoiceItem extends EntityModel
      * @var array
      */
     protected $fillable = [
+        'product_type',
         'tax_name1',
         'tax_rate1',
         'tax_name2',

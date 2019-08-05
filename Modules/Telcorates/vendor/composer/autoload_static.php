@@ -28,6 +28,7 @@ class ComposerStaticInit19c33f503cd646f1fcedae439bd243a2
         'Modules\\Telcorates\\Http\\Requests\\CreateTelcoratesRequest' => __DIR__ . '/../..' . '/Http/Requests/CreateTelcoratesRequest.php',
         'Modules\\Telcorates\\Http\\Requests\\TelcoratesRequest' => __DIR__ . '/../..' . '/Http/Requests/TelcoratesRequest.php',
         'Modules\\Telcorates\\Http\\Requests\\UpdateTelcoratesRequest' => __DIR__ . '/../..' . '/Http/Requests/UpdateTelcoratesRequest.php',
+        'Modules\\Telcorates\\Models\\TelcorateCode' => __DIR__ . '/../..' . '/Models/TelcorateCode.php',
         'Modules\\Telcorates\\Models\\Telcorates' => __DIR__ . '/../..' . '/Models/Telcorates.php',
         'Modules\\Telcorates\\Policies\\TelcoratesPolicy' => __DIR__ . '/../..' . '/Policies/TelcoratesPolicy.php',
         'Modules\\Telcorates\\Presenters\\TelcoratesPresenter' => __DIR__ . '/../..' . '/Presenters/TelcoratesPresenter.php',

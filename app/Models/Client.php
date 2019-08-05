@@ -608,6 +608,14 @@ class Client extends EntityModel
             }
         }
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cdrs()
+    {
+        return $this->hasMany('App\Models\Cdr');
+    }
 }
 
 Client::creating(function ($client) {

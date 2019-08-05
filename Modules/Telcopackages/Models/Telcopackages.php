@@ -31,7 +31,7 @@ class Telcopackages extends EntityModel
      *
      * @var array
      */
-    protected $appends = ['product_type', 'product_key'];
+    protected $appends = ['product_type', 'product_key', 'cost'];
 
     public function getEntityType()
     {
@@ -53,6 +53,10 @@ class Telcopackages extends EntityModel
     
     public function setProductKeyAttribute($value) {
         $this->attributes['name'] = $value;
+    }
+
+    public function getCostAttribute() {
+        return $this->attributes['price'];
     }
 
     /**

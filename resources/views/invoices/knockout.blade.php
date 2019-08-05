@@ -200,12 +200,6 @@ function ViewModel(data) {
         return false;
     });
 
-    // set required attribut to client field
-    if (self.invoice().invoice_category_id() === '1') {
-        $('.client-input').attr('required', true);
-    } else {
-        $('.client-input').attr('required', false);
-    }
 }
 
 function InvoiceModel(data) {
@@ -664,13 +658,6 @@ function InvoiceModel(data) {
         return self.isPartialSet();
     });
 
-    self.invoiceCategoryIdChanged = function(obj, event) {
-        if (self.invoice_category_id() === '1') {
-            $('.client-input').attr('required', true);
-        } else {
-            $('.client-input').attr('required', false);
-        }
-    }
 }
 
 function ClientModel(data) {

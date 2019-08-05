@@ -1,0 +1,17 @@
+{
+    "name": "ImportColt",
+    "alias": "importcolt",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\ImportColt\\Providers\\ImportColtServiceProvider"
+    ],
+    "aliases":{},
+    "files": [
+        "start.php"
+    ],
+    "icon": "download",
+    "plural": "importcolt"
+}

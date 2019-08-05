@@ -13,6 +13,7 @@ return array(
     'Modules\\Telcorates\\Http\\Requests\\CreateTelcoratesRequest' => $baseDir . '/Http/Requests/CreateTelcoratesRequest.php',
     'Modules\\Telcorates\\Http\\Requests\\TelcoratesRequest' => $baseDir . '/Http/Requests/TelcoratesRequest.php',
     'Modules\\Telcorates\\Http\\Requests\\UpdateTelcoratesRequest' => $baseDir . '/Http/Requests/UpdateTelcoratesRequest.php',
+    'Modules\\Telcorates\\Models\\TelcorateCode' => $baseDir . '/Models/TelcorateCode.php',
     'Modules\\Telcorates\\Models\\Telcorates' => $baseDir . '/Models/Telcorates.php',
     'Modules\\Telcorates\\Policies\\TelcoratesPolicy' => $baseDir . '/Policies/TelcoratesPolicy.php',
     'Modules\\Telcorates\\Presenters\\TelcoratesPresenter' => $baseDir . '/Presenters/TelcoratesPresenter.php',

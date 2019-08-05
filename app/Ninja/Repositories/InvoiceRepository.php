@@ -782,7 +782,7 @@ class InvoiceRepository extends BaseRepository
             $invoiceItem->fill($item);
             $invoiceItem->product_id = isset($product) ? $product->id : null;
             $invoiceItem->product_key = isset($item['product_key']) ? (trim($invoice->is_recurring ? $item['product_key'] : Utils::processVariables($item['product_key']))) : '';
-            $invoiceItem->product_type = isset($item['product_type']) ? $item['product_type'] : ENTITY_PRODUCT;
+            $invoiceItem->product_type = !empty($item['product_type']) ? $item['product_type'] : ENTITY_PRODUCT;
             $invoiceItem->notes = trim($invoice->is_recurring ? $item['notes'] : Utils::processVariables($item['notes']));
             $invoiceItem->cost = Utils::parseFloat($item['cost']);
             $invoiceItem->qty = Utils::parseFloat($item['qty']);

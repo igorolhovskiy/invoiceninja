@@ -227,4 +227,10 @@ class ClientRepository extends BaseRepository
 
         return ($clientId && isset($map[$clientId])) ? $map[$clientId] : null;
     }
+
+    public function getClientByDid($did) {
+        return Client::scope()
+            ->whereRaw('FIND_IN_SET(' . $did . ', colt_dids) > 0')
+            ->first();
+    }
 }
