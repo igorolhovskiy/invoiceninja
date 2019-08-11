@@ -140,7 +140,7 @@ class ColtService
             $totalSum += $sumCdr->sum_cost;
         }
         // If we don't exceed the limit we don't create invoice
-        if ($client->call_cost_limit >= $totalSum) {
+        if ($client->invoice_sum_limit >= $totalSum) {
             return true;
         }
 
@@ -149,12 +149,30 @@ class ColtService
         $invoice->public_id = 0;
         $importColt = $this->importColtRepository->getById($importColtId);
         $invoice->invoice_date = $importColt->invoice_date;
+        if (!empty($coltInvoice->due_date)) {
+            $invoice->due_date = Utils::toSqlDate(
+                Carbon::parse($importColt->invoice_date)
+                ->addDay(Carbon::parse($coltInvoice->due_date)->day)
+            );
+        }
         $invoice->invoice_category_id = INVOICE_ITEM_CATEGORY_ORDINARY;
         $invoice->invoice_items = collect([]);
         $sumCost = $sumCdr->sum_cost;
+
+        $billing_period_start = Carbon::parse($sumCdr->date_from)
+            ->startOfMonth()
+            ->toDateString();
+        $billing_period_stop = Carbon::parse($sumCdr->date_to)
+            ->endOfMonth()
+            ->toDateString();
         foreach ($coltInvoice->invoice_items as $item) {
             $invoice_item = $item->toArray();
             $invoice_item['invoice_id'] = null;
+            $invoice_item['notes'] = str_replace(
+                array('$billing_period_start', '$billing_period_stop'),
+                array($billing_period_start, $billing_period_stop),
+                $invoice_item['notes']
+            );
             if ($invoice_item['product_type'] === 'telcorates') {
                 $invoice_item['qty'] = 1;
                 $invoice_item['cost'] = $sumCost;

@@ -10,6 +10,7 @@ use App\Models\Contact;
 use Auth;
 use Cache;
 use DB;
+use Utils;
 
 class ClientRepository extends BaseRepository
 {
@@ -141,6 +142,11 @@ class ClientRepository extends BaseRepository
         }
 
         $client->fill($data);
+
+        if (isset($data['sepa_date'])) {
+            $client->sepa_date = Utils::toSqlDate($data['sepa_date']);
+        }
+
         $client->save();
 
         /*
@@ -230,7 +236,7 @@ class ClientRepository extends BaseRepository
 
     public function getClientByDid($did) {
         return Client::scope()
-            ->whereRaw('FIND_IN_SET(' . $did . ', colt_dids) > 0')
+            ->whereRaw("$did REGEXP CONCAT('^(', REPLACE(colt_dids, ',' , '[[:digit:]]*)|('), '[[:digit:]]*)$')")
             ->first();
     }
 }

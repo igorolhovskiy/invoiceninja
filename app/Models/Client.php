@@ -66,11 +66,12 @@ class Client extends EntityModel
         'custom_messages',
         'astpp_client_id',
         'colt_dids',
-        'call_cost_limit',
+        'invoice_sum_limit',
         'crm_code',
         'iban',
         'bic',
         'sepa',
+        'sepa_date'
     ];
 
     /**

@@ -270,12 +270,26 @@
 						{!! Former::number('astpp_client_id')->label('astpp_client_id') !!}
 						{!! Former::text('colt_dids')->label('colt_did_list')
 							->help('List of dids are divided by comma without spaces, Example: did1,did2') !!}
-						{!! Former::number('call_cost_limit')->step('any')->label('call_cost_limit') !!}
+						{!! Former::number('invoice_sum_limit')->step('any')->label('invoice_sum_limit') !!}
 						{!! Former::text('crm_code')->label('crm_code') !!}
 
 						{!! Former::text('iban')->label('iban') !!}
 						{!! Former::text('bic')->label('bic') !!}
 						{!! Former::text('sepa')->label('sepa') !!}
+						{!! Former::text('sepa_date')
+							->label('Sepa date')
+							->data_date_format(Session::get(SESSION_DATE_PICKER_FORMAT, DEFAULT_DATE_PICKER_FORMAT))
+							->appendIcon('calendar')
+							->addGroupClass('sepa_date')
+						!!}		
+							<script type="text/javascript">
+									$(function() {
+											$('#sepa_date').datepicker();
+									});
+									$('.sepa_date .input-group-addon').click(function() {
+											toggleDatePicker('sepa_date');
+									});									
+							</script>				
 					</div>
 				</div>
 		</div>
