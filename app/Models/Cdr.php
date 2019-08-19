@@ -9,7 +9,7 @@ class Cdr extends EntityModel
     /**
      * @var string
      */
-    protected $fillable = ["import_colt_id", "did", "datetime", "dst", "dur", "cost", "done"];
+    protected $fillable = ["import_colt_id", "did", "datetime", "dst", "dur", "cost", "done", "status"];
 
     /**
      * @var string

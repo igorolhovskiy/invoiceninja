@@ -80,6 +80,11 @@ if (! defined('APP_NAME')) {
     define('INVOICE_ITEM_CATEGORY_COLT', 2);
     define('INVOICE_ITEM_CATEGORY_ASTPP', 3);
 
+    define('CDR_STATUS_RATE_NOT_FOUND', 'RATE_NOT_FOUND');
+    define('CDR_STATUS_PACKAGE_CALL', 'PACKAGE');
+    define('CDR_STATUS_PACKAGE_STANDARD', 'PACKAGE+STANDARD');
+    define('CDR_STATUS_STANDARD', 'STANDARD');
+
     define('PERSON_CONTACT', 'contact');
     define('PERSON_USER', 'user');
     define('PERSON_VENDOR_CONTACT', 'vendorcontact');
