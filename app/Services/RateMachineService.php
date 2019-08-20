@@ -38,11 +38,7 @@ class RateMachineService
     
     public function __construct($precision = 2) {
         // Yes, I know it's like this by default, but I want it to be explicit.
-        $this->client = NULL;
-        $this->coltInvoice = NULL;
-        $this->packages = NULL;
-        $this->rateId = NULL;
-        $this->precision = $precision;
+        $this->resetMachine($precision);
     }
     /**
      * Init machine for Client
@@ -122,10 +118,11 @@ class RateMachineService
     /** 
      * Reset all counters
      */
-    public function resetMachine() {
+    public function resetMachine($precision = 2) {
         $this->client = NULL;
         $this->coltInvoice = NULL;
-        $this->packageIds = NULL;
+        $this->packages = NULL;
         $this->rateId = NULL;
+        $this->precision = $precision;
     }
 }
