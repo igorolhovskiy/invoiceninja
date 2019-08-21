@@ -69,8 +69,14 @@ class RateMachineService
                 ->get();
         }
 
+        $code_to_search = "380";
+
         foreach ($this->packages as $key => $package) {
-            $this->packages[$key]->myData = "My Test Data";
+            $my_value = $package->codes->first(function ($value) use ($code_to_search) {
+                    return $value->code == $code_to_search;
+                }
+            );
+            $this->packages[$key]->search_result = $my_value ? $my_value->code : "NA";
         }
 
         dd($this->packages->toArray());
