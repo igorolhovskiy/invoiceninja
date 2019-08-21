@@ -158,7 +158,7 @@ class RateMachineService
             return $cdr;
         }
         
-        $call_cost = round((float)($durationMediated / 60) * (float)$rate->rate, $precision);
+        $call_cost = round((float)($durationMediated / 60) * (float)$rate->rate, $this->precision);
 
         $cdr->cost = $call_cost;
         $cdrStatus = $cdrStatus . CDR_STATUS_STANDARD;
