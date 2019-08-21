@@ -17,7 +17,7 @@ class RateMachineService
     protected $packages; // array of telco package id and it's info
     protected $rateId; // id of telco rate
     protected $precision; // Number of digits after the dot
-
+    protected $defaultInitIncrementSeconds;
 
     private function mediateDuration($duration, $initSeconds, $incrementSeconds) {
         
@@ -28,17 +28,17 @@ class RateMachineService
             return $initSeconds;
         }
 
-        $duration_corrected = $duration - $initSeconds;
-        $extra_add = ($duration_corrected % $incrementSeconds == 0) ? 0 : 1;
+        $durationCorrected = $duration - $initSeconds;
+        $extraAdd = ($durationCorrected % $incrementSeconds == 0) ? 0 : 1;
         
-        $duration_corrected = $init_inc + (floor($duration_corrected / $incrementSeconds) + $extra_add) * $incrementSeconds;
+        $durationCorrected = $initSeconds + (floor($durationCorrected / $incrementSeconds) + $extraAdd) * $incrementSeconds;
 
-        return $duration_corrected;
+        return $durationCorrected;
     }
     
-    public function __construct($precision = 2) {
+    public function __construct($precision = 2, $defaultInitIncrementSeconds = 1) {
         // Yes, I know it's like this by default, but I want it to be explicit.
-        $this->resetMachine($precision);
+        $this->resetMachine($precision, $defaultInitIncrementSeconds);
     }
     /**
      * Init machine for Client
@@ -68,18 +68,6 @@ class RateMachineService
                 ->with('codes')
                 ->get();
         }
-
-        $code_to_search = "380";
-
-        foreach ($this->packages as $key => $package) {
-            $my_value = $package->codes->first(function ($value) use ($code_to_search) {
-                    return $value->code == $code_to_search;
-                }
-            );
-            $this->packages[$key]->search_result = $my_value ? $my_value->code : "NA";
-        }
-
-        dd($this->packages->toArray());
 
         $rateItem = $this->coltInvoice
             ->invoice_items->where('product_type', 'telcorates')
@@ -111,20 +99,72 @@ class RateMachineService
         }
         echo "Found rate: code:{$rate->code}, second:{$rate->init_seconds}, increment: {$rate->increment_seconds}, rate:{$rate->rate}" . PHP_EOL;
 
-        $duration_mediated = $this->mediateDuration($cdr->dur, $rate->init_seconds, $rate->increment_seconds);
+        if ($rate->init_seconds <= 0) {
+            $rate->init_seconds = $this->defaultInitIncrementSeconds;
+        }
+        if ($rate->increment_seconds <= 0) {
+            $rate->increment_seconds = $this->defaultInitIncrementSeconds;
+        }
 
-        // Looking for packages:
+        $durationMediated = $this->mediateDuration($cdr->dur, $rate->init_seconds, $rate->increment_seconds);
+        $cdrStatus = '';
+
+        // Processing packages
+        if ($this->packages) {
+
+            $packageId = NULL;
+
+            $code_to_search = $cdr->dst;
+
+            // Cycling through number
+            while (strlen($code_to_search) >= 1) {
+                foreach ($this->packages as $id => $package) {
+
+                    $found_code = $package->codes->first(function ($value) use ($code_to_search) {
+                            return $value->code == $code_to_search;
+                        }
+                    );
+
+                    if ($found_code && $package->amount_of_minutes > 0) {// Save further info only on packages that have amount of minutes left
+                        $packageId = $id;
+                        echo "Found active package: id:{$id}, Name:{$package->name}, Min left:{$package->amount_of_minutes}" . PHP_EOL;
+                        break 2; // Exit both while and foreach
+                    }
+                }
+                $code_to_search = mb_substr($code_to_search, 0, -1);
+            }
+
+            if ($packageId) {
+                // Package for this call found
+                $package_minute_left = $this->packages[$packageId]->amount_of_minutes;
+                if ($durationMediated <= $package_minute_left) { // We have more minutes than call is done
+                    $this->packages[$packageId]->amount_of_minutes = $package_minute_left - $durationMediated;
+                    $cdrStatus = CDR_STATUS_PACKAGE_CALL;
+                    $durationMediated = 0;
+                    echo "Call to $cdr->dst is within package " . $this->packages[$packageId]->name . PHP_EOL;
+                } else { // We have combined call of PACKAGE + STANDARD
+                    $this->packages[$packageId]->amount_of_minutes = 0;
+                    $cdrStatus = CDR_STATUS_PACKAGE_PLUS;
+                    $durationMediated -= $package_minute_left; // Reduce medirated duration on package size
+                    echo "Call to $cdr->dst is partial within package " . $this->packages[$packageId]->name . PHP_EOL;
+                }
+            }
+        }
+
+        if ($durationMediated == 0) {
+            $cdr->cost = 0;
+            $cdr->status = $cdrStatus;
+            $cdr->done = 1;
+            return $cdr;
+        }
         
+        $call_cost = round((float)($durationMediated / 60) * (float)$rate->rate, $precision);
 
-        // if ($package) {
-        //    echo "Found package: name:{$package->name}, minutes:{$package->amount_of_minutes}, price:{$package->price}" . PHP_EOL;
-        // } else {
-        //    echo 'No one Packages found' . PHP_EOL;
-        // }
-        $cost = rand(0, 75);
-
-        $cdr->cost = $cost;
+        $cdr->cost = $call_cost;
+        $cdrStatus = $cdrStatus . CDR_STATUS_STANDARD;
         $cdr->done = 1;
+
+        echo "Call to $cdr->dst cost is $call_cost". PHP_EOL;
 
         return $cdr;
     }
@@ -132,11 +172,12 @@ class RateMachineService
     /** 
      * Reset all counters
      */
-    public function resetMachine($precision = 2) {
+    public function resetMachine($precision = 2, $defaultInitIncrementSeconds = 1) {
         $this->client = NULL;
         $this->coltInvoice = NULL;
         $this->packages = NULL;
         $this->rateId = NULL;
         $this->precision = $precision;
+        $this->defaultInitIncrementSeconds = $defaultInitIncrementSeconds;
     }
 }

@@ -82,7 +82,7 @@ if (! defined('APP_NAME')) {
 
     define('CDR_STATUS_RATE_NOT_FOUND', 'RATE_NOT_FOUND');
     define('CDR_STATUS_PACKAGE_CALL', 'PACKAGE');
-    define('CDR_STATUS_PACKAGE_STANDARD', 'PACKAGE+STANDARD');
+    define('CDR_STATUS_PACKAGE_PLUS', 'PACKAGE+');
     define('CDR_STATUS_STANDARD', 'STANDARD');
 
     define('PERSON_CONTACT', 'contact');
