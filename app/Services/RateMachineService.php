@@ -65,8 +65,10 @@ class RateMachineService
         if (count($packageIds) > 0) {
             $this->packages = \Modules\Telcopackages\Models\Telcopackages
                 ::whereIn('id', $packageIds)
+                ->with('codes')
                 ->all();
         }
+        dd($this->packages->toArray());
         $rateItem = $this->coltInvoice
             ->invoice_items->where('product_type', 'telcorates')
             ->first();
@@ -102,11 +104,11 @@ class RateMachineService
         // Looking for packages:
         
 
-        if ($package) {
-            echo "Found package: name:{$package->name}, minutes:{$package->amount_of_minutes}, price:{$package->price}" . PHP_EOL;
-        } else {
-            echo 'No one Packages found' . PHP_EOL;
-        }
+        // if ($package) {
+        //    echo "Found package: name:{$package->name}, minutes:{$package->amount_of_minutes}, price:{$package->price}" . PHP_EOL;
+        // } else {
+        //    echo 'No one Packages found' . PHP_EOL;
+        // }
         $cost = rand(0, 75);
 
         $cdr->cost = $cost;
