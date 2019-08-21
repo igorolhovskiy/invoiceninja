@@ -66,9 +66,15 @@ class RateMachineService
             $this->packages = \Modules\Telcopackages\Models\Telcopackages
                 ::whereIn('id', $packageIds)
                 ->with('codes')
-                ->all();
+                ->get();
         }
+
+        foreach ($this->packages as $key => $package) {
+            $this->packages[$key]->myData = "My Test Data";
+        }
+
         dd($this->packages->toArray());
+
         $rateItem = $this->coltInvoice
             ->invoice_items->where('product_type', 'telcorates')
             ->first();
