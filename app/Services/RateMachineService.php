@@ -117,7 +117,7 @@ class RateMachineService
             $codeToSearch = $cdr->dst;
 
             // Cycling through number
-            while (strlen($code_to_search) >= 1) {
+            while (strlen($codeToSearch) >= 1) {
                 foreach ($this->packages as $id => $package) {
 
                     $found_code = $package->codes->first(function ($value) use ($codeToSearch) {
@@ -135,7 +135,7 @@ class RateMachineService
                         break 2; // Exit both while and foreach
                     }
                 }
-                $code_to_search = mb_substr($code_to_search, 0, -1);
+                $codeToSearch = mb_substr($codeToSearch, 0, -1);
             }
 
             if ($packageId) {
