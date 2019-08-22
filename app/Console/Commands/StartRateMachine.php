@@ -57,7 +57,7 @@ class StartRateMachine extends Command
         $rateMachineService->initMachine($client);
         foreach ($cdrs as $cdr) {
             $cdr = $rateMachineService->calculateCall($cdr);
-            $this->info("did: {$cdr->did}, dst:{$cdr->dst}, dur:{$cdr->dur}, cost:{$cdr->cost}");
+            $this->info("did: {$cdr->did}, dst:{$cdr->dst}, dur:{$cdr->dur}, cost:{$cdr->cost}, status:{$cdr->status}");
         }
     }
 }
