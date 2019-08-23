@@ -125,11 +125,15 @@ class RateMachineService
                         }
                     );
 
+                    if (!$found_code) {
+                        continue;
+                    }
+
                     if (!isset($package->amount_of_seconds)) {
                         $package->amount_of_seconds = $package->amount_of_minutes * 60;
                     }
 
-                    if ($found_code && $package->amount_of_seconds > 0) {// Save further info only on packages that have amount of minutes left
+                    if ($package->amount_of_seconds > 0) {// Save further info only on packages that have amount of minutes left
                         $packageId = $id;
                         echo "Found active package: id:{$id}, Name:{$package->name}, Sec left:{$package->amount_of_seconds}" . PHP_EOL;
                         break 2; // Exit both while and foreach
@@ -138,7 +142,7 @@ class RateMachineService
                 $codeToSearch = mb_substr($codeToSearch, 0, -1);
             }
 
-            if ($packageId) {
+            if ($packageId !== NULL) {
                 // Package for this call found
                 $packageSecondsLeft = $this->packages[$packageId]->amount_of_seconds;
 
