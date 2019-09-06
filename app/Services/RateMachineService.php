@@ -114,38 +114,50 @@ class RateMachineService
 
             $packageId = NULL;
 
-            $code_to_search = $cdr->dst;
+            $codeToSearch = $cdr->dst;
 
             // Cycling through number
-            while (strlen($code_to_search) >= 1) {
+            while (strlen($codeToSearch) >= 1) {
                 foreach ($this->packages as $id => $package) {
 
-                    $found_code = $package->codes->first(function ($value) use ($code_to_search) {
-                            return $value->code == $code_to_search;
+                    $found_code = $package->codes->first(function ($value) use ($codeToSearch) {
+                            return $value->code == $codeToSearch;
                         }
                     );
 
-                    if ($found_code && $package->amount_of_minutes > 0) {// Save further info only on packages that have amount of minutes left
+                    if (!$found_code) {
+                        continue;
+                    }
+
+                    if (!isset($package->amount_of_seconds)) {
+                        $package->amount_of_seconds = $package->amount_of_minutes * 60;
+                    }
+
+                    if ($package->amount_of_seconds > 0) {// Save further info only on packages that have amount of minutes left
                         $packageId = $id;
-                        echo "Found active package: id:{$id}, Name:{$package->name}, Min left:{$package->amount_of_minutes}" . PHP_EOL;
+                        echo "Found active package: id:{$id}, Name:{$package->name}, Sec left:{$package->amount_of_seconds}" . PHP_EOL;
                         break 2; // Exit both while and foreach
                     }
                 }
-                $code_to_search = mb_substr($code_to_search, 0, -1);
+                $codeToSearch = mb_substr($codeToSearch, 0, -1);
             }
 
-            if ($packageId) {
+            if ($packageId !== NULL) {
                 // Package for this call found
-                $package_minute_left = $this->packages[$packageId]->amount_of_minutes;
-                if ($durationMediated <= $package_minute_left) { // We have more minutes than call is done
-                    $this->packages[$packageId]->amount_of_minutes = $package_minute_left - $durationMediated;
+                $packageSecondsLeft = $this->packages[$packageId]->amount_of_seconds;
+
+                if ($durationMediated <= $packageSecondsLeft) { // We have more seconds than call is done
+
+                    $this->packages[$packageId]->amount_of_seconds = $packageSecondsLeft - $durationMediated;
                     $cdrStatus = CDR_STATUS_PACKAGE_CALL;
                     $durationMediated = 0;
                     echo "Call to $cdr->dst is within package " . $this->packages[$packageId]->name . PHP_EOL;
+
                 } else { // We have combined call of PACKAGE + STANDARD
-                    $this->packages[$packageId]->amount_of_minutes = 0;
+
+                    $this->packages[$packageId]->amount_of_seconds = 0;
                     $cdrStatus = CDR_STATUS_PACKAGE_PLUS;
-                    $durationMediated -= $package_minute_left; // Reduce medirated duration on package size
+                    $durationMediated = $durationMediated - $packageSecondsLeft; // Reduce medirated duration on package size
                     echo "Call to $cdr->dst is partial within package " . $this->packages[$packageId]->name . PHP_EOL;
                 }
             }
@@ -161,7 +173,7 @@ class RateMachineService
         $call_cost = round((float)($durationMediated / 60) * (float)$rate->rate, $this->precision);
 
         $cdr->cost = $call_cost;
-        $cdrStatus = $cdrStatus . CDR_STATUS_STANDARD;
+        $cdr->status = $cdrStatus . CDR_STATUS_STANDARD;
         $cdr->done = 1;
 
         echo "Call to $cdr->dst cost is $call_cost". PHP_EOL;
