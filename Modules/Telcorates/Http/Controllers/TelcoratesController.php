@@ -11,6 +11,8 @@ use Modules\Telcorates\Http\Requests\TelcoratesRequest;
 use Modules\Telcorates\Http\Requests\CreateTelcoratesRequest;
 use Modules\Telcorates\Http\Requests\UpdateTelcoratesRequest;
 
+use Modules\Telcorates\Models\Telcorates;
+
 class TelcoratesController extends BaseController
 {
     protected $TelcoratesRepo;
@@ -123,9 +125,35 @@ class TelcoratesController extends BaseController
     {
         $action = request()->input('action');
         $ids = request()->input('public_id') ?: request()->input('ids');
+
+        if ($action === 'delete') {
+            $client = $this->telcoratesRepo->checkActiveClient($ids);
+            if ($client) {
+                return redirect()->to('telcorates')
+                    ->with('error', "This rate is used on Invoices of client {$client->name}");
+            }
+        }
+
         $count = $this->telcoratesRepo->bulk($ids, $action);
 
         return redirect()->to('telcorates')
             ->with('message', mtrans('telcorates', $action . '_telcorates_complete'));
     }
+
+    public function checkName($id = false)
+    {
+        $name = request()->name;
+
+        $query = Telcorates::scope()
+                    ->where('name', $name)
+                    ->withTrashed();
+
+        if ($id) {
+            $query->where('public_id', '!=', $id);
+        }
+
+        $count = $query->count();
+
+        return $count ? RESULT_FAILURE : RESULT_SUCCESS;
+    }    
 }

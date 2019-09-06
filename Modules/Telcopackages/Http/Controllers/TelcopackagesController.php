@@ -11,6 +11,8 @@ use Modules\Telcopackages\Http\Requests\TelcopackagesRequest;
 use Modules\Telcopackages\Http\Requests\CreateTelcopackagesRequest;
 use Modules\Telcopackages\Http\Requests\UpdateTelcopackagesRequest;
 
+use Modules\Telcopackages\Models\Telcopackages;
+
 class TelcopackagesController extends BaseController
 {
     protected $TelcopackagesRepo;
@@ -122,9 +124,35 @@ class TelcopackagesController extends BaseController
     {
         $action = request()->input('action');
         $ids = request()->input('public_id') ?: request()->input('ids');
+
+        if ($action === 'delete') {
+            $client = $this->telcopackagesRepo->checkActiveClient($ids);
+            if ($client) {
+                return redirect()->to('telcopackages')
+                    ->with('error', "This package is used on Invoices of client {$client->name}");
+            }
+        }
+
         $count = $this->telcopackagesRepo->bulk($ids, $action);
 
         return redirect()->to('telcopackages')
             ->with('message', mtrans('telcopackages', $action . '_telcopackages_complete'));
+    }
+
+    public function checkName($id = false)
+    {
+        $name = request()->name;
+
+        $query = Telcopackages::scope()
+                    ->where('name', $name)
+                    ->withTrashed();
+
+        if ($id) {
+            $query->where('public_id', '!=', $id);
+        }
+
+        $count = $query->count();
+
+        return $count ? RESULT_FAILURE : RESULT_SUCCESS;
     }
 }

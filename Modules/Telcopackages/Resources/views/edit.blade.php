@@ -6,7 +6,9 @@
             ->addClass('col-md-10 col-md-offset-1 warn-on-exit')
             ->method($method)
             ->setAttribute('id', 'telcopackageForm')
-            ->rules([]) !!}
+            ->rules([array(
+        		'name' => 'required',
+        	)]) !!}
 
     @if ($telcopackages)
       {!! Former::populate($telcopackages) !!}
@@ -21,7 +23,10 @@
             <div class="panel panel-default">
             <div class="panel-body">
 
-                {!! Former::text('name') !!}
+                {!! Former::text('name')
+                    ->addGroupClass('package-name')
+                    ->onchange('checkName()')
+                !!}
 {!! Former::text('amount_of_minutes') !!}
 {!! Former::text('price') !!}
 
@@ -112,10 +117,15 @@
             $(".warn-on-exit input").first().focus();
         })
         
-        $('form').submit(function() {
+        $('form').submit(function(e) {
+            // check name is unique
+            checkName(true);
+            if ($('.package-name').hasClass('has-error')) {
+                return false;
+            }
             $('#formSubmitButton')
                 .prop("disabled", true)
-                .text('Saving...');
+                .text('Saving...');                    
             return true;
         });
 
@@ -144,6 +154,32 @@
         }
 
         ko.applyBindings(new CodeViewModel());
+
+        function checkName(syncMode = false) {
+            var url = '/telcopackages/check_name{{ $telcopackages && $telcopackages->id ? '/' . $telcopackages->public_id : '' }}?name=' + encodeURIComponent($('#name').val());
+
+            $.ajax({
+                url: url, 
+                success: function(data) {
+                    var isValid = data == '{{ RESULT_SUCCESS }}' ? true : false;
+                    if (isValid) {
+                        $('.package-name')
+                            .removeClass('has-error')
+                            .find('span')
+                            .hide();
+                    } else {
+                        if ($('.package-name').hasClass('has-error')) {
+                            return;
+                        }
+                        $('.package-name')
+                            .addClass('has-error')
+                            .find('div')
+                            .append('<span class="help-block">{{ trans('validation.unique', ['attribute' => trans('texts.name')]) }}</span>');
+                    }
+                },
+                async: !syncMode
+            });
+        }         
     </script>
     
 

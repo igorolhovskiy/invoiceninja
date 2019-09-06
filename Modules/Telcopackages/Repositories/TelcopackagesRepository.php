@@ -81,4 +81,17 @@ class TelcopackagesRepository extends BaseRepository
         return $entity;
     }
 
+    public function checkActiveClient($id) {
+        $client = \App\Models\Client::scope()
+            ->whereHas('invoices', function($query) use ($id) {
+                $query->whereHas('invoice_items', function($queryItems) use ($id) {
+                    $queryItems->where('product_type', 'telcopackages')
+                        ->where('product_id', $id);
+                });
+            })
+            ->first();
+
+        return $client;
+    }
+
 }

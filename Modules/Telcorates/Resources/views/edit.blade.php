@@ -21,7 +21,10 @@
             <div class="panel panel-default">
             <div class="panel-body">
 
-                {!! Former::text('name') !!}
+                {!! Former::text('name')
+                    ->addGroupClass('rate-name')
+                    ->onchange('checkName()')
+                 !!}
 
                 <div class="row" style="margin-top: 32px;" data-bind="visible: codes().length">
                     <div class="col-md-2">
@@ -145,6 +148,11 @@
         })
 
         $('form').submit(function() {
+            // check name is unique
+            checkName(true);
+            if ($('.rate-name').hasClass('has-error')) {
+                return false;
+            }            
             $('#formSubmitButton')
                 .prop("disabled", true)
                 .text('Saving...');
@@ -173,7 +181,12 @@
                 });
             };
 
-            this.removeCode = (code) => this.codes.remove(code);
+            this.removeCode = (code) => {
+                this.codes.remove(code);
+                if (!this.codes.length) {
+                    this.addCode();
+                }
+            }
 
             if (codes && codes.length) {
                 codes.forEach(code => this.addCode(code));
@@ -230,6 +243,32 @@
             });
             return codes;
         }
+
+        function checkName(syncMode = false) {
+            var url = '/telcorates/check_name{{ $telcorates && $telcorates->id ? '/' . $telcorates->public_id : '' }}?name=' + encodeURIComponent($('#name').val());
+
+            $.ajax({
+                url: url, 
+                success: function(data) {
+                    var isValid = data == '{{ RESULT_SUCCESS }}' ? true : false;
+                    if (isValid) {
+                        $('.rate-name')
+                            .removeClass('has-error')
+                            .find('span')
+                            .hide();
+                    } else {
+                        if ($('.rate-name').hasClass('has-error')) {
+                            return;
+                        }
+                        $('.rate-name')
+                            .addClass('has-error')
+                            .find('div')
+                            .append('<span class="help-block">{{ trans('validation.unique', ['attribute' => trans('texts.name')]) }}</span>');
+                    }
+                },
+                async: !syncMode
+            });
+        }         
     </script>
     
 
