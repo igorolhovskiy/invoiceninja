@@ -21,16 +21,33 @@ class ColtService
     protected $importColtRepository;
     protected $invoiceService;
 
+    private $srcPatterns;
+    private $dstPatterns;
+
     public function __construct(ClientRepository $clientRepository, 
         CdrRepository $cdrRepository,
         ImportColtRepository $importcoltRepo,
         RateMachineService $rateMachineService,
         InvoiceService $invoiceService) {
+
         $this->clientRepository = $clientRepository;
         $this->cdrRepository = $cdrRepository;
         $this->rateMachineService = $rateMachineService;
         $this->importColtRepository = $importcoltRepo;
         $this->invoiceService = $invoiceService;
+
+        $this->dstPatterns = array(
+            array('^0([1-9])(\d+)$', '41$1$2'), // Austria National
+            array('^00([1-9])(\d+)$', '$1$2'), // International strip 00
+            array('^([1-9])(\d+)$', '431$1$2'), // Austria Vienna Domestic -- ?
+            array('^\+([1-9])(\d+)$', '$1$2'), // International strip +
+        );
+
+        $this->srcPatterns = array(
+            array('^00([1-9])(\d+)$', '$1$2'), // International strip 00
+            array('^\+([1-9])(\d+)$', '$1$2'), // International strip +
+        );
+        
     }
 
     public function parseColtFile($fileName, $isVerify = false) {
@@ -39,7 +56,7 @@ class ColtService
         foreach(preg_split( '/\r\n|\r|\n/', $coltContents) as $index => $row) {
             $data = str_getcsv($row, ';');
             if (count($data) > 17) {
-                $did = $this->normalizeDid($data[4]);
+                $did = $this->normalizeSrc($data[4]);
                 $datetime = Carbon::parse($data[5] . ' ' . $data[6]);
                 $dst = $this->normalizeDst($data[9]);
                 $dur = $data[10];
@@ -186,25 +203,23 @@ class ColtService
         $invoice = $this->invoiceService->save($data);
     }
 
-    private function normalizeDid($did) {
-        return preg_replace('/^00/', '', $did);
+    private function normalizeNumber($number, $patterns) {
+        foreach ($patterns as $pattern) {
+            if (preg_match('/' . $pattern[0] . '/', $number, $matches)) {
+                $return_number = $number;
+                foreach (array_slice($matches, 1) as $matchKey=>$matchValue) {
+                    $return_number = str_replace('$' . $matchKey, $matchValue, $return_number);
+                }
+            }
+        }
+        return $number;
     }
 
     private function normalizeDst($dst) {
-        // Domestic in Austria
-        if (preg_match('/^0[1-9]\d+/', $dst)) {
-            return preg_replace('/^0([1-9])(\d+)/', '41${1}${2}', $dst);
-        }
-        // Local
-        if (preg_match('/^[1-9]\d+/', $dst)) {
-            return preg_replace('/^([1-9])(\d+)/', '431${1}${2}', $dst);
-        }
-        // International
-        if (preg_match('/^00[1-9]\d+/', $dst)) {
-            return preg_replace('/^00([1-9])(\d+)/', '${1}${2}', $dst);
-        }
-        if (preg_match('/^\+[1-9]\d+/', $dst)) {
-            return preg_replace('/^\+([1-9])(\d+)/', '${1}${2}', $dst);
-        }
+        return $this->normalizeNumber($dst, $this->dstPatterns);
+    }
+
+    private function normalizeSrc($src) {
+        return $this->normalizeNumber($src, $this->srcPatterns);
     }
 }
