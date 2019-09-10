@@ -208,7 +208,7 @@ class ColtService
             if (preg_match('/' . $pattern[0] . '/', $number, $matches)) {
                 $return_number = $number;
                 foreach (array_slice($matches, 1) as $matchKey=>$matchValue) {
-                    $return_number = str_replace('$' . $matchKey, $matchValue, $return_number);
+                    $return_number = str_replace('$' . $matchKey + 1, $matchValue, $return_number);
                 }
                 return $return_number;
             }
