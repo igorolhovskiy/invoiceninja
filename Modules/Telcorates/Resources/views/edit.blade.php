@@ -94,7 +94,7 @@
                     </div>
                     <div class="col-md-1">
                         {!! Button::danger()
-                            ->withAttributes(['data-bind' =>'click: $root.removeCode'])
+                            ->withAttributes(['data-bind' =>'click: $root.removeCode.bind($data, $index())'])
                             ->appendIcon('<i class="fa fa-times" aria-hidden="true"></i>')
                         !!}     
                     </div>
@@ -107,9 +107,16 @@
                             ->appendIcon(Icon::create('plus')) 
                         !!}
                         <button type="button" class="btn btn-info"
+                            data-bind="disabled: isCsvUploading"
                             onClick="$('#uploadCsv').click()">
-                            Import CSV
-                            <i class="fa fa-upload" aria-hidden="true"></i>
+                            <span data-bind="ifnot: isCsvUploading">
+                                Import CSV
+                                <i class="fa fa-upload" aria-hidden="true"></i>
+                            </span>
+                            <span data-bind="if: isCsvUploading">
+                                Uploading
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </span>
                         </button>
                         <input type="file"
                             id="uploadCsv"
@@ -165,6 +172,8 @@
 
             this.codes = ko.observableArray([]);     
 
+            this.isCsvUploading = ko.observable(false);
+
             this.addCode = (code = null, checkValidity = true) => {
                 if (checkValidity && this.codes().length
                     && $.grep($('#telcorateForm [name^="codes"]'), item => !item.checkValidity()).length) {
@@ -181,9 +190,9 @@
                 });
             };
 
-            this.removeCode = (code) => {
-                this.codes.remove(code);
-                if (!this.codes.length) {
+            this.removeCode = (code, index) => {
+                this.codes.splice(index, 1);
+                if (!this.codes().length) {
                     this.addCode();
                 }
             }
@@ -197,26 +206,28 @@
             this.uploadCsv = (file) => {
                 if (file) {
                     if (window.FileReader) {
-                    const fileExt = file.name.split('.').pop();
-                    if (fileExt !== 'csv') {
-                        console.log('upload file extension is wrong');
-                        return false;
-                    }
-                    this.fileReader = new FileReader();
-                    this.fileReader.onabort = () => {
-                        $('#uploadCsv')[0].value = null;
-                        this.uploadState = 'error';
-                    };
+                        this.isCsvUploading(true);                     
+                        const fileExt = file.name.split('.').pop();
+                        if (fileExt !== 'csv') {
+                            console.log('upload file extension is wrong');
+                            return false;
+                        }
+                        this.fileReader = new FileReader();
+                        this.fileReader.onabort = () => {
+                            $('#uploadCsv')[0].value = null;
+                            this.uploadState = 'error';
+                        };
 
-                    this.fileReader.onload = (event) => {
-                        const csv = event.target.result;
-                        parseCsv(csv).forEach(code => this.addCode(code, false));
-                        $('#uploadCsv')[0].value = null;
-                    };
-                    this.fileReader.onerror = () => {
-                        this.uploadState = 'error';
-                    };
-                    this.fileReader.readAsText(file);
+                        this.fileReader.onload = (event) => {
+                            const csv = event.target.result;
+                            parseCsv(csv).forEach(code => this.addCode(code, false));
+                            $('#uploadCsv')[0].value = null;
+                            this.isCsvUploading(false);
+                        };
+                        this.fileReader.onerror = () => {
+                            this.uploadState = 'error';
+                        };
+                        this.fileReader.readAsText(file);
                     } else {
                         console.error('FileReader is not supported in this browser.');
                     }
