@@ -210,6 +210,7 @@ class ColtService
                 foreach (array_slice($matches, 1) as $matchKey=>$matchValue) {
                     $return_number = str_replace('$' . $matchKey, $matchValue, $return_number);
                 }
+                return $return_number;
             }
         }
         return $number;
