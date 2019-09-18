@@ -37,15 +37,16 @@ class ColtService
         $this->invoiceService = $invoiceService;
 
         $this->dstPatterns = array(
-            array('^0([1-9])(\d+)$', '41$1$2'), // Austria National
-            array('^00([1-9])(\d+)$', '$1$2'), // International strip 00
-            array('^([1-9])(\d+)$', '431$1$2'), // Austria Vienna Domestic -- ?
-            array('^\+([1-9])(\d+)$', '$1$2'), // International strip +
+            array('^0([1-9])(\d+)', '41$1$2'), // Austria National
+            array('^00([1-9])(\d+)', '$1$2'), // International strip 00
+            array('^([1-9])(\d+)', '431$1$2'), // Austria Vienna Domestic -- ?
+            array('^\+([1-9])(\d+)', '$1$2'), // International strip +
         );
 
         $this->srcPatterns = array(
-            array('^00([1-9])(\d+)$', '$1$2'), // International strip 00
-            array('^\+([1-9])(\d+)$', '$1$2'), // International strip +
+            array('^00([1-9])(\d+)', '$1$2'), // International strip 00
+            array('^\+([1-9])(\d+)', '$1$2'), // International strip +
+            array('^(?!00)(\d+)', '$1'),      // Just remove all non-digits from number
         );
         
     }
@@ -208,7 +209,7 @@ class ColtService
             if (preg_match('/' . $pattern[0] . '/', $number, $matches)) {
                 $return_number = $pattern[1];
                 foreach (array_slice($matches, 1) as $matchKey=>$matchValue) {
-                    $return_number = str_replace('$' . $matchKey + 1, $matchValue, $return_number);
+                    $return_number = str_replace('$' . ($matchKey + 1), $matchValue, $return_number);
                 }
                 return $return_number;
             }
