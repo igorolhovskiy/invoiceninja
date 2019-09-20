@@ -41,9 +41,9 @@ class RateColtCalls implements ShouldQueue
         Utils::logColtService('info', 'Start to rate cdrs for import_colt_id = ' . $this->importColtId . ' ...');
         try {
             \Auth::setUser($this->user);
-            $coltService->rateColtCalls($this->importColtId);
+            $clientCount = $coltService->rateColtCalls($this->importColtId);
             echo 'cdrs are rated' . PHP_EOL;
-            Utils::logColtService('info', 'cdrs are rated.');
+            Utils::logColtService('info', 'Cdrs of ' . $clientCount . ' clients were rated.');
             dispatch(new BillColtCalls(\Auth::user(), $this->importColtId));
         } catch(\Exception $e) {
            echo 'ERROR:' . $e->getMessage() . PHP_EOL;

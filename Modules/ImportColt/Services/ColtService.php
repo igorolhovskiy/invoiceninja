@@ -81,7 +81,9 @@ class ColtService
             $item['import_colt_id'] = $import_colt_id;
             $this->cdrRepository->save($item);
         }
-        $this->cdrRepository->updateClient();
+        echo "All data was saved to cdrs table" . PHP_EOL;
+        $update_result = $this->cdrRepository->updateClient();
+        return $update_result;
     }
 
     public function rateColtCalls($importColtId) {
@@ -95,6 +97,7 @@ class ColtService
         foreach ($clients as $client) {
             $this->rateClientCalls($client, $importColtId);
         }
+        return $clients->count();
     }
 
     public function rateClientCalls(\App\Models\Client $client, int $importColtId)
@@ -124,9 +127,19 @@ class ColtService
         })
         ->orderBy('id')
         ->get();
+        $stat = [
+            'count' => 0,
+            'sum' => 0
+        ];
         foreach ($clients as $client) {
-            $this->billClientCalls($client, $importColtId);
+            $invoice = $this->billClientCalls($client, $importColtId);
+            if ($invoice) {
+                $stat['count'] += 1;
+                $stat['sum'] += $invoice->amount;
+            }
+
         }
+        return $stat;
     }
 
     public function billClientCalls($client, $importColtId) {
@@ -143,7 +156,7 @@ class ColtService
             ->where('invoice_category_id', INVOICE_ITEM_CATEGORY_COLT)
             ->first();
         if (!$coltInvoice) {
-            return true;
+            return false;
         }
         $totalSum = 0;
         $hasTelcoRates = false;
@@ -159,7 +172,7 @@ class ColtService
         }
         // If we don't exceed the limit we don't create invoice
         if ($client->invoice_sum_limit >= $totalSum) {
-            return true;
+            return false;
         }
 
         $account = \Auth::user()->account;        
@@ -202,6 +215,7 @@ class ColtService
         }
         $data = $invoice->toArray();
         $invoice = $this->invoiceService->save($data);
+        return $invoice;
     }
 
     private function normalizeNumber($number, $patterns) {

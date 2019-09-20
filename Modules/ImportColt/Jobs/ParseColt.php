@@ -51,9 +51,10 @@ class ParseColt implements ShouldQueue
             Utils::logColtService('info', 'Successfuly parsed ' . count($coltData) . ' rows');
             echo 'Build cdrs ' . PHP_EOL;
             Utils::logColtService('info', 'Start build cdrs...');
-            $coltService->buildCdr($coltData, $this->importColt->id);
-            echo 'cdrs is builded' . PHP_EOL;
-            Utils::logColtService('info', 'cdrs is builded');
+            $countClientUpdated = $coltService->buildCdr($coltData, $this->importColt->id);
+            echo 'cdrs were builded' . PHP_EOL;
+            Utils::logColtService('info', count($coltData) . ' rows were saved to cdrs.');
+            Utils::logColtService('info', $countClientUpdated . ' rows were updated with client.');
             dispatch(new RateColtCalls(\Auth::user(), $this->importColt->id));
             
         } catch(\Exception $e) {
