@@ -1482,4 +1482,10 @@ class Utils
         );
         return strtr($s, $replace);
     }
+
+    public static function logColtService($level, $message)
+    {
+        $stacktrace = sprintf("%s %s %s \n", date('Y-m-d h:i:s'), $level, $message);
+        file_put_contents(storage_path('logs/colt-service.log'), $stacktrace, FILE_APPEND);        
+    }
 }

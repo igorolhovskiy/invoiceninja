@@ -7,6 +7,7 @@
     {!! Former::text('datatable')->value('true') !!}
 </div>
 
+@if ($entityType !== 'importcolt')
 <div class="pull-left">
 	@if (in_array($entityType, [ENTITY_TASK, ENTITY_EXPENSE, ENTITY_PRODUCT, ENTITY_PROJECT]))
 		@can('create', 'invoice')
@@ -41,6 +42,7 @@
 		</select>
 	</span>
 </div>
+@endif
 
 <div id="top_right_buttons" class="pull-right">
 	<input id="tableFilter_{{ $entityType }}" type="text" style="width:180px;margin-right:17px;background-color: white !important"

@@ -40,15 +40,20 @@ class ImportColtDatatable extends EntityDatatable
     {
         return [
             [
-                mtrans('importcolt', 'edit_importcolt'),
-                function ($model) {
-                    return URL::to("importcolt/{$model->public_id}/edit");
-                },
-                function ($model) {
-                    return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
-                }
+                // mtrans('importcolt', 'edit_importcolt'),
+                // function ($model) {
+                //     return URL::to("importcolt/{$model->public_id}/edit");
+                // },
+                // function ($model) {
+                //     return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
+                // }
             ],
         ];
     }
+
+    public function bulkActions()
+    {
+        return [];
+    }    
 
 }
