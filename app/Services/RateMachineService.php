@@ -35,6 +35,15 @@ class RateMachineService
 
         return $durationCorrected;
     }
+
+    private function round_up($value, $places = 0) {
+        if ($places < 0) { 
+            $places = 0; 
+        }
+        $mult = pow(10, $places);
+
+        return ceil($value * $mult) / $mult;
+      }
     
     public function __construct($precision = 2, $defaultInitIncrementSeconds = 1) {
         // Yes, I know it's like this by default, but I want it to be explicit.
@@ -170,7 +179,8 @@ class RateMachineService
             return $cdr;
         }
         
-        $call_cost = round((float)($durationMediated / 60) * (float)$rate->rate, $this->precision);
+        //$call_cost = round((float)($durationMediated / 60) * (float)$rate->rate, $this->precision);
+        $call_cost = $this->round_up((float)($durationMediated / 60) * (float)$rate->rate, $this->precision);
 
         $cdr->cost = $call_cost;
         $cdr->status = $cdrStatus . CDR_STATUS_STANDARD;
