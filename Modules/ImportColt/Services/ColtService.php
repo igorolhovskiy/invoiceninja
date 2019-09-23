@@ -37,7 +37,7 @@ class ColtService
         $this->invoiceService = $invoiceService;
 
         $this->dstPatterns = array(
-            array('^0([1-9])(\d+)', '41$1$2'), // Austria National
+            array('^0([1-9])(\d+)', '43$1$2'), // Austria National
             array('^00([1-9])(\d+)', '$1$2'), // International strip 00
             array('^([1-9])(\d+)', '431$1$2'), // Austria Vienna Domestic -- ?
             array('^\+([1-9])(\d+)', '$1$2'), // International strip +
