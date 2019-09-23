@@ -44,7 +44,7 @@ class CdrRepository extends BaseRepository
     public function updateClient()
     {
         return DB::update('update `cdrs` inner join `clients` ' 
-            . 'on FIND_IN_SET(cdrs.did, colt_dids) > 0 '
+            . "on cdrs.did REGEXP CONCAT('^(', REPLACE(colt_dids, ',' , '[[:digit:]]*)|('), '[[:digit:]]*)$') "
             . 'set `cdrs`.`client_id` = clients.id ' 
             . 'where `cdrs`.`account_id` = ? and `clients`.`account_id` = ? '
             . 'and cdrs.client_id is null',
