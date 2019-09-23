@@ -111,6 +111,7 @@ class ColtService
             $cdr = $this->rateMachineService->calculateCall($cdr);
             $cdr->save();
         }
+        $this->rateMachineService->resetMachine();
     }
 
     /**
