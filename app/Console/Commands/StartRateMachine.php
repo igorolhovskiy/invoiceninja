@@ -50,14 +50,14 @@ class StartRateMachine extends Command
         }
         $cdrs = \App\Models\Cdr
             ::where('client_id', $client->id)
-            ->where('done', 0)
+            //->where('done', 0)
             ->orderBy('id')
             ->get();
         
         $rateMachineService->initMachine($client);
         foreach ($cdrs as $cdr) {
             $cdr = $rateMachineService->calculateCall($cdr);
-            $this->info("did: {$cdr->did}, dst:{$cdr->dst}, dur:{$cdr->dur}, cost:{$cdr->cost}, status:{$cdr->status}");
+            $this->info("Date:{$cdr->datetime} did:{$cdr->did}, dst:{$cdr->dst}, dur:{$cdr->dur}, cost:{$cdr->cost}, status:{$cdr->status}, done:{$cdr->done}");
         }
     }
 }
