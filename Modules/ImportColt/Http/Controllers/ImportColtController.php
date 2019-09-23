@@ -85,7 +85,7 @@ class ImportColtController extends BaseController
     public function store(CreateImportColtRequest $request)
     {
         $importColt = $this->importcoltRepo->save($request->input());
-        
+
         $job = new ParseColt(\Auth::user(), $importColt);
         dispatch($job);
 
