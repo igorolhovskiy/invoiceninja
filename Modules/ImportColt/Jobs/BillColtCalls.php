@@ -39,7 +39,7 @@ class BillColtCalls implements ShouldQueue
         Utils::logColtService('info', 'Start bill cdrs for import_colt_id = ' . $this->importColtId . ' ...');
         try {
             \Auth::setUser($this->user);
-            $result = $coltService->billCdr($this->importColtId);
+            $result = $coltService->billCdr($this->importColtId, true);
             echo 'Invoices were billed' . PHP_EOL;
             Utils::logColtService('info', $result['count'] .' Invoices were billed on sum ' . $result['sum']);
         } catch(\Exception $e) {

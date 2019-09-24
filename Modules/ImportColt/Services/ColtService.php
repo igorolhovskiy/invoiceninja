@@ -120,7 +120,7 @@ class ColtService
     /**
      * Bill clients by cdr of colt file
      */
-    public function billCdr($importColtId) {
+    public function billCdr($importColtId, $isNeedLog = false) {
         $clients = \App\Models\Client::scope()
         ->whereHas('cdrs', function($query) use ($importColtId) {
             $query->where('import_colt_id', $importColtId)
@@ -138,7 +138,7 @@ class ColtService
                 $stat['count'] += 1;
                 $stat['sum'] += $invoice->amount;
             }
-
+            Utils::logColtService('info', "Created Invoice for client {$client->name} on sum {$invoice->amount}.");
         }
         return $stat;
     }

@@ -236,7 +236,11 @@ class ClientRepository extends BaseRepository
 
     public function getClientByDid($did) {
         return Client::scope()
-            ->whereRaw("$did REGEXP CONCAT('^(', REPLACE(colt_dids, ',' , '[[:digit:]]*)|('), '[[:digit:]]*)$')")
+            ->whereRaw("$did REGEXP CONCAT('^(',"
+            . " REPLACE("
+            . "REPLACE(REPLACE(colt_dids, ' ', ''), ';',','),"  // remove space and update ; to ,
+            . " ',' , '[[:digit:]]*)|('),"
+            . " '[[:digit:]]*)$') ")
             ->first();
     }
 }
