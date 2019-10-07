@@ -1,0 +1,121 @@
+<?php
+namespace Modules\ImportColt\Services;
+
+use App\Ninja\Datatables\EntityDatatable;
+use Auth;
+use Chumper\Datatable\Table;
+use Datatable;
+use Utils;
+
+/**
+ * Class DatatableService.
+ */
+class ColtDatatableService
+{
+    /**
+     * @param EntityDatatable $datatable
+     * @param $query
+     *
+     * @throws \Exception
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createDatatable(EntityDatatable $datatable, $query)
+    {
+        $table = Datatable::query($query);
+
+        if ($datatable->isBulkEdit) {
+            $table->addColumn('checkbox', function ($model) use ($datatable) {
+                $can_edit = Auth::user()->hasPermission('edit_' . $datatable->entityType) || (isset($model->user_id) && Auth::user()->id == $model->user_id);
+
+                return ! $can_edit ? '' : '<input type="checkbox" name="ids[]" value="' . $model->public_id
+                        . '" ' . Utils::getEntityRowClass($model) . '>';
+            });
+        }
+
+        foreach ($datatable->columns() as $column) {
+            // set visible to true by default
+            if (count($column) == 2) {
+                $column[] = true;
+            }
+
+            list($field, $value, $visible) = $column;
+
+            if ($visible) {
+                $table->addColumn($field, $value);
+                $orderColumns[] = $field;
+            }
+        }
+
+        if (count($datatable->actions())) {
+            $this->createDropdown($datatable, $table);
+        }
+
+        return $table->orderColumns($orderColumns)->make();
+    }
+
+    /**
+     * @param EntityDatatable $datatable
+     * @param Table           $table
+     */
+    private function createDropdown(EntityDatatable $datatable, $table)
+    {
+      $table->addColumn('dropdown', function ($model) use ($datatable) {
+          $hasAction = false;
+          $str = '<center style="min-width:100px">';
+
+          $can_edit = Auth::user()->hasPermission('edit_' . $datatable->entityType) || (isset($model->user_id) && Auth::user()->id == $model->user_id);
+
+          $str .= '<div class="tr-status"></div>';
+          $dropdown_contents = '';
+          $lastIsDivider = false;
+
+          foreach ($datatable->actions() as $action) {
+              if (count($action)) {
+                  // if show function isn't set default to true
+                  if (count($action) == 2) {
+                      $action[] = function () {
+                          return true;
+                      };
+                  }                   
+                  list($value, $url, $visible) = $action;
+                  if ($visible($model)) {
+                      if ($value == '--divider--') {
+                          $dropdown_contents .= '<li class="divider"></li>';
+                          $lastIsDivider = true;
+                      } else {
+                          $urlVal = $url($model);
+                          $urlStr = is_string($urlVal) ? $urlVal : $urlVal['url'];
+                          $attributes = '';
+                          if (! empty($urlVal['attributes'])) {
+                              $attributes = ' '.$urlVal['attributes'];
+                          }
+
+                          $dropdown_contents .= "<li><a href=\"$urlStr\"{$attributes}>{$value}</a></li>";
+                          $hasAction = true;
+                          $lastIsDivider = false;
+                      }
+                  }
+              } elseif (! $lastIsDivider) {
+                  $dropdown_contents .= '<li class="divider"></li>';
+                  $lastIsDivider = true;
+              }
+          }
+
+          if (! $hasAction) {
+              return '';
+          }
+
+          if (! empty($dropdown_contents)) {
+              $str .= '<div class="btn-group tr-action" style="height:auto;display:none">
+                  <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" style="width:100px">
+                      '.trans('texts.select').' <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">';
+              $str .= $dropdown_contents . '</ul>';
+          }
+
+          return $str.'</div></center>';
+      });
+  }  
+}

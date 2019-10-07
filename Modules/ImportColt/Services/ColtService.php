@@ -179,6 +179,7 @@ class ColtService
         $account = \Auth::user()->account;        
         $invoice = $account->createInvoice(ENTITY_INVOICE, $client->id);
         $invoice->public_id = 0;
+        $invoice->import_colt_id = $importColtId;
         $importColt = $this->importColtRepository->getById($importColtId);
         $invoice->invoice_date = $importColt->invoice_date;
         if (!empty($coltInvoice->due_date)) {
@@ -216,6 +217,13 @@ class ColtService
         }
         $data = $invoice->toArray();
         $invoice = $this->invoiceService->save($data);
+        \App\Models\Cdr::scope()
+            ->where('import_colt_id', $importColtId)
+            ->where('client_id', $client->id)
+            ->where('done', 1)
+            ->whereNull('invoice_id')
+            ->update(['invoice_id' => $invoice->id]);
+
         return $invoice;
     }
 

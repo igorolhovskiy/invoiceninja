@@ -223,6 +223,8 @@ if (! defined('APP_NAME')) {
     define('STATUS_ACTIVE', 'active');
     define('STATUS_ARCHIVED', 'archived');
     define('STATUS_DELETED', 'deleted');
+    define('INVOICE_STATUS_IMPORT_COLT', 'import_colt');
+    define('INVOICE_TYPE_COLT', 'type_colt');
 
     define('INVOICE_STATUS_DRAFT', 1);
     define('INVOICE_STATUS_SENT', 2);

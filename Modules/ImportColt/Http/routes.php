@@ -2,7 +2,8 @@
 
 Route::group(['middleware' => ['web', 'lookup:user', 'auth:user'], 'namespace' => 'Modules\ImportColt\Http\Controllers'], function()
 {
-    Route::get('importcolt/test', 'ImportColtController@test');
+    Route::get('importcolt/{importcolt}/renumber-invoices', 'ImportColtController@showRenumberInvoices');
+    Route::put('importcolt/{importcolt}/renumber-invoices', 'ImportColtController@renumberInvoices');
 
     Route::resource('importcolt', 'ImportColtController');
     Route::post('importcolt/bulk', 'ImportColtController@bulk');

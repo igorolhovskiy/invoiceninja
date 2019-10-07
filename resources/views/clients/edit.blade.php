@@ -281,7 +281,11 @@
 							->data_date_format(Session::get(SESSION_DATE_PICKER_FORMAT, DEFAULT_DATE_PICKER_FORMAT))
 							->appendIcon('calendar')
 							->addGroupClass('sepa_date')
-						!!}		
+						!!}
+						{!! Former::checkbox('is_cdr_attach_invoice')
+						        ->text(trans('texts.cdr_is_attached_to_invoice'))
+								->label('CDR to Invoice')
+						        ->value(1) !!}						
 							<script type="text/javascript">
 									$(function() {
 											$('#sepa_date').datepicker();

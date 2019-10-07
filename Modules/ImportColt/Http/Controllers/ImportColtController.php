@@ -4,7 +4,7 @@ namespace Modules\ImportColt\Http\Controllers;
 
 use Auth;
 use App\Http\Controllers\BaseController;
-use App\Services\DatatableService;
+use Modules\ImportColt\Services\ColtDatatableService;
 use Modules\ImportColt\Datatables\ImportColtDatatable;
 use Modules\ImportColt\Repositories\ImportColtRepository;
 use Modules\ImportColt\Http\Requests\ImportColtRequest;
@@ -50,7 +50,7 @@ class ImportColtController extends BaseController
         ]);
     }
 
-    public function datatable(DatatableService $datatableService)
+    public function datatable(ColtDatatableService $datatableService)
     {
         $search = request()->input('sSearch');
         $userId = Auth::user()->filterId();
@@ -140,10 +140,83 @@ class ImportColtController extends BaseController
     {
         $action = request()->input('action');
         $ids = request()->input('public_id') ?: request()->input('ids');
-        $count = $this->importcoltRepo->bulk($ids, $action);
+        try {
+            $count = $this->importcoltRepo->bulk($ids, $action);
+        } catch (\Exception $e) {
+            return redirect()->to('importcolt')
+                ->with('error', $action . ' was not successful. ' . $e->getMessage());
+        }
 
         return redirect()->to('importcolt')
             ->with('message', mtrans('importcolt', $action . '_importcolt_complete'));
+    }
+
+    /**
+     * Show the form for renumber all invoices of colt file.
+     * @return Response
+     */
+    public function showRenumberInvoices(ImportColtRequest $request)
+    {
+        $importcolt = $request->entity();
+        if (\App\Models\Invoice::scope()
+            ->whereHas('cdrs', function($query) use ($importcolt) {
+                $query->where('import_colt_id', $importcolt->id);
+            })
+            ->where('invoice_status_id', '<>', '1')
+            ->exists()) {
+                return redirect()->to('importcolt')
+                ->with('error', 'It is exist the Invoice with status not Draft');
+        }
+        $numberInvoices = \App\Models\Invoice::scope()
+            ->whereHas('cdrs', function($query) use ($importcolt) {
+                $query->where('import_colt_id', $importcolt->id);
+            })
+            ->count();
+        $account = Auth::user()->account;
+
+        $data = [
+            'importcolt' => $importcolt,
+            'method' => 'PUT',
+            'start_number' => $account->previewNextInvoiceNumber(),
+            'number_invoices' => $numberInvoices,
+            'url' => 'importcolt/' . $importcolt->public_id . '/renumber-invoices',
+            'title' => mtrans('importcolt', 'renumber_importcolt'),
+        ];
+
+        return view('importcolt::renumber', $data);
+    }
+
+    /**
+     * Renumber invoices
+     */
+    public function renumberInvoices(ImportColtRequest $request) {
+        $importcolt = $request->entity();
+        $startNumber = request()->input('start_number');
+        preg_match('/(.*?)([1-9]+0*)$/', $startNumber, $matches);
+        $prefix = $matches[1];
+        $invoiceNumber = intval($matches[2] ? $matches[2] : '0');
+        $account = Auth::user()->account;
+        $invoices = \App\Models\Invoice::scope()
+            ->whereHas('cdrs', function($query) use ($importcolt) {
+                $query->where('import_colt_id', $importcolt->id);
+            })
+            ->orderBy('id')
+            ->get();
+        foreach ($invoices as $invoice) {
+            $number = $prefix . $invoiceNumber;
+            if (\App\Models\Invoice::scope()->whereInvoiceNumber($number)->withTrashed()->exists()) {
+                continue;
+            }
+            $invoice->invoice_number = $number;
+            $invoice->save();
+            $invoiceNumber = $invoiceNumber + 1;
+        };
+        if ($account->invoice_number_counter < $invoiceNumber) {
+            $account->invoice_number_counter = $invoiceNumber;
+            $account->save();
+        }
+        return redirect()->to('importcolt')
+            ->with('message', count($invoices) . ' invoices were renumbered.');
     }
 
     /**
@@ -168,12 +241,5 @@ class ImportColtController extends BaseController
             'fileName' => $fileName,
             'coltFilePath' => $coltFile
         ]);
-    }
-
-    public function test() {
-        $importColt = $this->importcoltRepo->getById(2);
-        $job = new ParseColt(\Auth::user(), $importColt);
-        dispatch($job);
-        return response()->json("Hey");
     }
 }

@@ -7,6 +7,7 @@ use Utils;
 
 use Modules\ImportColt\Models\ImportColt;
 use App\Ninja\Repositories\BaseRepository;
+use App\Jobs\SendInvoiceEmail;
 //use App\Events\ImportcoltWasCreated;
 //use App\Events\ImportcoltWasUpdated;
 
@@ -78,5 +79,49 @@ class ImportcoltRepository extends BaseRepository
     {
         return ImportColt::scope()
             ->findOrFail($id);
+    }
+
+    /**
+     * @param $entity
+     */
+    public function delete($entity)
+    {
+        abort_if (\App\Models\Invoice::scope()
+            ->whereHas('cdrs', function($query) use ($entity) {
+                $query->where('import_colt_id', $entity->id);
+            })
+            ->where('invoice_status_id', '<>', '1')
+            ->exists(),
+        403, 'It is exist the Invoice with status not Draft');
+        // Delete invoices
+        $invoices = \App\Models\Invoice::scope()
+            ->whereHas('cdrs', function($query) use ($entity) {
+                $query->where('import_colt_id', $entity->id);
+            });
+        foreach($invoices->get() as $invoice) {
+            $invoice->invoice_items()->forceDelete();
+        }
+        $invoices->forceDelete();
+        // Delete cdrs
+        \App\Models\Cdr::scope()
+            ->where('import_colt_id', $entity->id)
+            ->forceDelete();
+
+        // Delete import colt
+        $entity->forceDelete();
+    }
+
+    /**
+     * @param $entity
+     */
+    public function emailInvoice($entity)
+    {
+        $invoices = \App\Models\Invoice::scope()
+        ->whereHas('cdrs', function($query) use ($entity) {
+            $query->where('import_colt_id', $entity->id);
+        });
+        foreach($invoices->get() as $invoice) {
+            dispatch(new SendInvoiceEmail($invoice));
+        }
     }
 }

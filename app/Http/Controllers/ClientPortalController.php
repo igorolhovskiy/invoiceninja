@@ -105,6 +105,31 @@ class ClientPortalController extends BaseController
         } else {
             $invoice->invoice_design->javascript = $invoice->invoice_design->pdfmake;
         }
+
+        // Add cdr to invoice
+        if ($client->is_cdr_attach_invoice) {
+            $cdrTable = [
+                ['DID', 'Datetime', 'Destination', 'Duration', 'Cost']
+            ];
+            $cdrs = \App\Models\Cdr::select('did', 'datetime', 'dst', 'dur', 'cost')
+                ->where('invoice_id', $invoice->id)
+                ->orderBy('datetime')
+                ->get();
+            foreach ($cdrs as $cdr) {
+                $cdrTable[] = [$cdr->did, $cdr->datetime, $cdr->dst, $cdr->dur, $cdr->cost];
+            }
+            $template = json_decode($invoice->invoice_design->javascript);
+            $template->content[] = (object) [
+                'table' => (object) [
+                    'headerRows' => 1,
+                    'widths' => [ 'auto', 'auto', '*', 'auto', 100 ],
+                    'body' => $cdrTable,
+                ],
+                'pageBreak' => 'before'
+            ];
+            $invoice->invoice_design->javascript = json_encode($template);
+        }
+
         $contact = $invitation->contact;
         $contact->setVisible([
             'first_name',

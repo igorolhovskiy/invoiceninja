@@ -31,4 +31,8 @@ class ImportColt extends EntityModel
         return 'importcolt';
     }
 
+    public function cdrs()
+    {
+        return $this->hasMany('\App\Models\Cdr');
+    }
 }

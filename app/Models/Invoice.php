@@ -51,6 +51,7 @@ class Invoice extends EntityModel implements BalanceAffecting
         'private_notes',
         'last_sent_date',
         'invoice_design_id',
+        'import_colt_id',
     ];
 
     /**
@@ -63,6 +64,17 @@ class Invoice extends EntityModel implements BalanceAffecting
         'has_expenses' => 'boolean',
     ];
 
+    /**
+     * @var array
+     */
+    public static $statuses = [
+        STATUS_ACTIVE,
+        STATUS_ARCHIVED,
+        STATUS_DELETED,
+        INVOICE_STATUS_IMPORT_COLT,
+        INVOICE_TYPE_COLT,
+    ];
+    
     // used for custom invoice numbers
     /**
      * @var array
@@ -400,6 +412,14 @@ class Invoice extends EntityModel implements BalanceAffecting
     public function invitations()
     {
         return $this->hasMany('App\Models\Invitation')->orderBy('invitations.contact_id');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function cdrs()
+    {
+        return $this->hasMany('App\Models\Cdr');
     }
 
     /**

@@ -71,7 +71,8 @@ class Client extends EntityModel
         'iban',
         'bic',
         'sepa',
-        'sepa_date'
+        'sepa_date',
+        'is_cdr_attach_invoice'
     ];
 
     /**
