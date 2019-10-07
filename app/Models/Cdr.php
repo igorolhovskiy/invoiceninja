@@ -20,4 +20,14 @@ class Cdr extends EntityModel
     {
         return 'cdr';
     }
+
+    public function invoice()
+    {
+        return $this->belongTo('App\Models\Invoice');
+    }
+
+    public function importColt()
+    {
+        return $this->belongTo('Modules\ImportColt\Models\ImportColt');
+    }    
 }

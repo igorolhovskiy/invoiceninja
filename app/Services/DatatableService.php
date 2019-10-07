@@ -59,7 +59,7 @@ class DatatableService
      * @param EntityDatatable $datatable
      * @param Table           $table
      */
-    private function createDropdown(EntityDatatable $datatable, $table)
+    protected function createDropdown(EntityDatatable $datatable, $table)
     {
         $table->addColumn('dropdown', function ($model) use ($datatable) {
             $hasAction = false;

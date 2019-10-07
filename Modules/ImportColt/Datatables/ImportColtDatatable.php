@@ -10,7 +10,11 @@ use App\Ninja\Datatables\EntityDatatable;
 class ImportColtDatatable extends EntityDatatable
 {
     public $entityType = 'importcolt';
-    public $sortCol = 1;
+    public $isBulkEdit = false;
+    public $hideClient = false;
+    public $sortCol = 2;
+
+    public function __construct() {}    
 
     public function columns()
     {
@@ -40,14 +44,43 @@ class ImportColtDatatable extends EntityDatatable
     {
         return [
             [
-                // mtrans('importcolt', 'edit_importcolt'),
-                // function ($model) {
-                //     return URL::to("importcolt/{$model->public_id}/edit");
-                // },
-                // function ($model) {
-                //     return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
-                // }
+                mtrans('importcolt', 'delete_importcolt'),
+                function ($model) {
+                    $confirmText = 'Delete Colt file with all cdr records and invoices.';
+                    return "javascript:submitForm_importcolt('delete', {$model->public_id}, '{$confirmText}')";
+                },
+                function ($model) {
+                    return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
+                }
+            ],            
+            [
+                mtrans('importcolt', 'renumber_importcolt'),
+                function ($model) {
+                    return URL::to("importcolt/{$model->public_id}/renumber-invoices");
+                },
+                function ($model) {
+                    return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
+                }
             ],
+            [
+                mtrans('importcolt', 'send_invoices_importcolt'),
+                function ($model) {
+                    $confirmText = 'Send all invoices to email.';
+                    return "javascript:submitForm_importcolt('emailInvoice', {$model->public_id}, '{$confirmText}')";
+                },
+                function ($model) {
+                    return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
+                }
+            ],
+            [
+                mtrans('importcolt', 'sepa_export_importcolt'),
+                function ($model) {
+                    return URL::to("importcolt/{$model->public_id}/edit");
+                },
+                function ($model) {
+                    return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
+                }
+            ],                                    
         ];
     }
 

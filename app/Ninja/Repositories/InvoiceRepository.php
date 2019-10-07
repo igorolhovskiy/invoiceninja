@@ -122,6 +122,12 @@ class InvoiceRepository extends BaseRepository
                               ->where('invoices.is_public', '=', true);
                     });
                 }
+                if (in_array(INVOICE_STATUS_IMPORT_COLT, $statuses)) {
+                    $query->orWhereNotNull('invoices.import_colt_id');
+                }
+                if (in_array(INVOICE_TYPE_COLT, $statuses)) {
+                    $query->orWhere('invoices.invoice_category_id', '=', INVOICE_ITEM_CATEGORY_COLT);
+                }                               
             });
         }
 

@@ -166,7 +166,7 @@
 <script type="text/javascript">
 
 	var submittedForm;
-	function submitForm_{{ $entityType }}(action, id) {
+	function submitForm_{{ $entityType }}(action, id, text) {
 		// prevent duplicate form submissions
 		if (submittedForm) {
 			swal("{{ trans('texts.processing_request') }}")
@@ -181,11 +181,13 @@
 		if (action == 'delete' || action == 'emailInvoice') {
 	        sweetConfirm(function() {
 	            $('#action_{{ $entityType }}').val(action);
-	    		$('form.listForm_{{ $entityType }}').submit();
-	        });
+							$('form.listForm_{{ $entityType }}').submit();
+							submittedForm = false;
+	        }, text);
 		} else {
 			$('#action_{{ $entityType }}').val(action);
 			$('form.listForm_{{ $entityType }}').submit();
+			submittedForm = false;
 	    }
 	}
 

@@ -3157,6 +3157,11 @@ $LANG = array(
     'invoice_category_colt' => 'Colt',
     'invoice_category_astpp' => 'ASTPP',
     'process_invoice' => 'Process invoices',
+    'renumber-invoices' => 'Renumber invoices',
+    'renumber_invoices' => 'Renumber invoices',
+    'import_colt' => 'Import COLT',
+    'type_colt' => 'Type COLT',
+    'cdr_is_attached_to_invoice' => 'CDR is attached to invoice'
 );
 
 return $LANG;
