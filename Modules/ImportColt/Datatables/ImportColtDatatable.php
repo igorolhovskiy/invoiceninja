@@ -30,7 +30,13 @@ class ImportColtDatatable extends EntityDatatable
                 function ($model) {
                     return $model->invoice_date;
                 }
-            ],            
+            ],        
+            [
+                'status',
+                function ($model) {
+                    return $model->status;
+                }
+            ],                
             [
                 'created_at',
                 function ($model) {
