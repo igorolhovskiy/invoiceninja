@@ -57,6 +57,10 @@
                 if (data[0].indexOf('ENTITY_ARCHIVED') > 0) {
                     $(row).addClass('entityArchived');
                 }
+                var entityType = '{{ isset($values['entityType']) ? $values['entityType'] : '' }}';
+                if (entityType === 'invoices' && data[2] === 'Colt') {
+                    $(row).css('backgroundColor', 'lightgray');
+                }
             },
             "bAutoWidth": false,
             "aoColumnDefs": [

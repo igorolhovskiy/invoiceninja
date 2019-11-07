@@ -46,6 +46,8 @@ class ParseColt implements ShouldQueue
         echo "Colt file path:" . $filePath . PHP_EOL;
         try {
             \Auth::setUser($this->user);
+            $this->importColt->status = 'in process';
+            $this->importColt->save();
             $coltData = $coltService->parseColtFile($filePath);
             echo 'Successfuly parsed ' . count($coltData) . ' rows' . PHP_EOL;
             Utils::logColtService('info', 'Successfuly parsed ' . count($coltData) . ' rows');

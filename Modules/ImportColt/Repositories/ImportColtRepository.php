@@ -32,7 +32,8 @@ class ImportcoltRepository extends BaseRepository
                     ->select(
                         'import_colts.name', 
                         'import_colts.file_path',
-                        'import_colts.invoice_date',  
+                        'import_colts.invoice_date',
+                        'import_colts.status',  
                         'import_colts.public_id',
                         'import_colts.deleted_at',
                         'import_colts.created_at',

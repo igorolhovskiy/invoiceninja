@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Bus\Queueable;
 
 use Modules\ImportColt\Services\ColtService;
+use Modules\ImportColt\Repositories\ImportColtRepository;
 
 class BillColtCalls implements ShouldQueue
 {
@@ -34,7 +35,7 @@ class BillColtCalls implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ColtService $coltService)
+    public function handle(ColtService $coltService, ImportColtRepository $importColtRepository)
     {
         Utils::logColtService('info', 'Start bill cdrs for import_colt_id = ' . $this->importColtId . ' ...');
         try {
@@ -42,6 +43,9 @@ class BillColtCalls implements ShouldQueue
             $result = $coltService->billCdr($this->importColtId, true);
             echo 'Invoices were billed' . PHP_EOL;
             Utils::logColtService('info', $result['count'] .' Invoices were billed on sum ' . $result['sum']);
+            $importColt = $importColtRepository->getById($this->importColtId);
+            $importColt->status = 'completed';
+            $importColt->save();
         } catch(\Exception $e) {
            echo 'ERROR:' . $e->getMessage() . PHP_EOL;
            echo 'File: ' . $e->getFile() . PHP_EOL;

@@ -19,7 +19,7 @@ class ImportColt extends EntityModel
     /**
      * @var string
      */
-    protected $fillable = ["name", "file_path", "invoice_date"];
+    protected $fillable = ["name", "file_path", "invoice_date", "status"];
 
     /**
      * @var string
