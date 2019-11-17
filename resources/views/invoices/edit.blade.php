@@ -562,14 +562,14 @@
 					@else
 						{!! Button::normal(trans("texts.save_draft"))->withAttributes(array('id' => 'draftButton', 'onclick' => 'onSaveDraftClick()'))->appendIcon(Icon::create('floppy-disk')) !!}
 						@if (! $invoice->trashed())
-							<span data-bind="visible: invoice_category_id() === '1'">
+							<span data-bind="visible: is_recurring() || invoice_category_id() === '1'">
 							{!! Button::success(trans($invoice->is_recurring ? "texts.mark_ready" : "texts.mark_sent"))
 								->withAttributes(array('id' => 'saveButton', 'onclick' => 'onMarkSentClick()'))
 								->appendIcon(Icon::create('globe')) !!}
 							</span>
 						@endif
 					@endif
-					<span data-bind="visible: invoice_category_id() === '1'">
+					<span data-bind="visible: is_recurring() || invoice_category_id() === '1'">
 					@if (! $invoice->trashed())
 						{!! Button::info(trans("texts.email_{$entityType}"))->withAttributes(array('id' => 'emailButton', 'onclick' => 'onEmailClick()'))->appendIcon(Icon::create('send')) !!}
 					@endif
