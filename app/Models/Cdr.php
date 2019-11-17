@@ -9,7 +9,17 @@ class Cdr extends EntityModel
     /**
      * @var string
      */
-    protected $fillable = ["import_colt_id", "did", "datetime", "dst", "dur", "cost", "done", "status"];
+    protected $fillable = [
+        'client_id',
+        'astpp_cdr_uniqueid',
+        "import_colt_id",
+        "did",
+        "datetime",
+        "dst",
+        "dur",
+        "cost",
+        "done",
+        "status"];
 
     /**
      * @var string

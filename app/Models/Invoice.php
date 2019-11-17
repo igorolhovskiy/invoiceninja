@@ -13,6 +13,7 @@ use App\Models\Activity;
 use App\Models\Credit;
 use App\Models\Traits\ChargesFees;
 use App\Models\Traits\HasRecurrence;
+use App\Models\Traits\AstppRecurrence;
 use DateTime;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laracasts\Presenter\PresentableTrait;
@@ -27,6 +28,7 @@ class Invoice extends EntityModel implements BalanceAffecting
     use OwnedByClientTrait;
     use ChargesFees;
     use HasRecurrence;
+    use AstppRecurrence;
     use SoftDeletes {
         SoftDeletes::trashed as parentTrashed;
     }

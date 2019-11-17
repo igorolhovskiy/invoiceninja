@@ -146,7 +146,7 @@ class ColtService
     public function billClientCalls($client, $importColtId) {
         $sumCdr = \App\Models\Cdr::scope()
             ->selectRaw('sum(cost) as sum_cost, min(datetime) as date_from, max(datetime) as date_to')
-            ->where('import_colt_id', $importColtId)
+            ->whereNotNull('import_colt_id')
             ->where('client_id', $client->id)
             ->where('done', 1)
             ->whereNull('invoice_id')
@@ -218,7 +218,7 @@ class ColtService
         $data = $invoice->toArray();
         $invoice = $this->invoiceService->save($data);
         \App\Models\Cdr::scope()
-            ->where('import_colt_id', $importColtId)
+            ->whereNotNull('import_colt_id')
             ->where('client_id', $client->id)
             ->where('done', 1)
             ->whereNull('invoice_id')

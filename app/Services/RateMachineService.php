@@ -51,8 +51,10 @@ class RateMachineService
     }
     /**
      * Init machine for Client
+     * @param Client $client
+     * @param number $category // invoice_category_id can be INVOICE_ITEM_CATEGORY_COLT or INVOICE_ITEM_CATEGORY_ASTPP
      */
-    public function initMachine(Client $client) {
+    public function initMachine(Client $client, $category = INVOICE_ITEM_CATEGORY_COLT) {
         if (!$client) {
             return False;
         }
@@ -60,7 +62,7 @@ class RateMachineService
         $this->coltInvoice = \App\Models\Invoice
             ::with('invoice_items')
             ->where('client_id', $client->id)
-            ->where('invoice_category_id', INVOICE_ITEM_CATEGORY_COLT)
+            ->where('invoice_category_id', $category)
             ->first();
         if (!$this->coltInvoice) {
             return False;

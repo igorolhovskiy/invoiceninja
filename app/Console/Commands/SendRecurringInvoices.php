@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Auth;
 use Exception;
 use Utils;
+use App\Jobs\HandleAstppRecurringInvoice;
 
 /**
  * Class SendRecurringInvoices.
@@ -92,6 +93,12 @@ class SendRecurringInvoices extends Command
             }
 
             $this->info(date('r') . ' Processing Invoice: '. $recurInvoice->id);
+            
+            if ( $recurInvoice->invoice_category_id === INVOICE_ITEM_CATEGORY_ASTPP ) {
+                $this->info(date('r') . ' Invoice has type ASTTP, dispatch to Asttp Recuring Invoice job');
+                dispatch(new HandleAstppRecurringInvoice($recurInvoice));
+                continue;
+            }
 
             $account = $recurInvoice->account;
             $account->loadLocalizationSettings($recurInvoice->client);

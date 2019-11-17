@@ -54,4 +54,8 @@ class CdrRepository extends BaseRepository
             . 'and cdrs.client_id is null',
             [\Auth::user()->account_id, \Auth::user()->account_id]);
     }
+
+    public function findByAstppId($uniqueId) {
+        return Cdr::where('astpp_cdr_uniqueid', $uniqueId)->first();
+    }    
 }
