@@ -42,7 +42,7 @@ class RateMachineService
         }
         $mult = pow(10, $places);
 
-        return ceil($value * $mult) / $mult;
+        return round(ceil($value * $mult) / $mult, $places);
       }
     
     public function __construct($precision = 4, $defaultInitIncrementSeconds = 1) {
