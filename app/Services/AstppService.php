@@ -102,7 +102,7 @@ class AstppService
     $client = $recurInvoice->client;
     $sumCdr = \App\Models\Cdr::scope()
       ->selectRaw('sum(cost) as sum_cost, min(datetime) as date_from, max(datetime) as date_to')
-      ->whereNotNull('import_colt_id')
+      ->whereNotNull('astpp_cdr_uniqueid')
       ->where('client_id', $client->id)
       ->where('done', 1)
       ->whereNull('invoice_id')
