@@ -53,12 +53,14 @@ class AstppService
       throw new Exception('Not found Astpp account');
     }
     echo "Get Data from ASTPP DB for number: $client->astpp_client_id", PHP_EOL;
+    Utils::logAstppService('info', "Get Data from ASTPP DB for number: $client->astpp_client_id");
     $astppAccount = $this->astppAccountRepo->getAccountByNumber($client->astpp_client_id);
     if (!$astppAccount) {
       throw new Exception('Not found Astpp account in Astpp DB: ' . $client->astpp_client_id);
     }
     $astppCdr = $this->astppCdrRepo->getCdr($astppAccount->id, $startDate, $endDate);
     echo "There is found " . $astppCdr->count() . ' cdr records in astpp DB', PHP_EOL;
+    Utils::logAstppService('info', "There is found " . $astppCdr->count() . ' cdr records in astpp DB');
     $counter = 0;
     foreach($astppCdr as $cdr) {
       if ($this->cdrRepo->findByAstppId($cdr->uniqueid)) {
@@ -75,6 +77,7 @@ class AstppService
       $counter += 1;
     }
     echo date('r'), " $counter cdr records were added", PHP_EOL;
+    Utils::logAstppService('info', "$counter cdr records were added");
   }
 
   public function rateClientCalls(\App\Models\Client $client)
@@ -119,6 +122,7 @@ class AstppService
     // If we don't exceed the limit we don't create invoice
     if ($client->invoice_sum_limit >= $totalSum) {
       echo "Total sum less sum limit, invoice don't bill", PHP_EOL;
+      Utils::logAstppService('info', "Total sum $totalSum less sum limit, invoice don't bill");
       return false;
     }
 

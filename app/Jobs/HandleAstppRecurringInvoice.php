@@ -58,7 +58,9 @@ class HandleAstppRecurringInvoice implements ShouldQueue
             echo date('r'), ' Bill Client by recurring invoice', PHP_EOL;
             Utils::logAstppService('info', 'Bill Client by recurring invoice');
             $invoice = $astppService->billClient($this->recurInvoice);
-            Utils::logAstppService('info', 'Created invoice ' . $invoice->invoice_number . ' on sum ' . $invoice->amount);
+            if ($invoice) {
+                Utils::logAstppService('info', 'Created invoice ' . $invoice->invoice_number . ' on sum ' . $invoice->amount);
+            }
             if ($invoice && ! $invoice->isPaid() && $account->auto_email_invoice) {
                 echo date('r') . ' Not billed - Sending Invoice', PHP_EOL;
                 dispatch(new SendInvoiceEmail($invoice, $invoice->user_id));
