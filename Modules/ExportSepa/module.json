@@ -1,0 +1,17 @@
+{
+    "name": "ExportSepa",
+    "alias": "exportsepa",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\ExportSepa\\Providers\\ExportSepaServiceProvider"
+    ],
+    "aliases":{},
+    "files": [
+        "start.php"
+    ],
+    "icon": "share",
+    "plural": "exportsepa"
+}
