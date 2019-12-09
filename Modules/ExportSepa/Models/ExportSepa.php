@@ -31,6 +31,11 @@ class ExportSepa extends EntityModel
         return 'exportsepa';
     }
 
+    public function account()
+    {
+        return $this->belongsTo('App\Models\Account');
+    }
+    
     public function items() {
         return $this->hasMany('Modules\ExportSepa\Models\ExportSepaItem', 'exportsepa_id');
     }

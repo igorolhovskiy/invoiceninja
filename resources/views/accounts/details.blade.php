@@ -109,6 +109,25 @@
 
             </div>
         </div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">{!! trans('texts.sepa_details') !!}</h3>
+          </div>
+            <div class="panel-body form-padding-right">
+
+            {!! Former::text('sepa_initiating_party_name') !!}
+            {!! Former::text('sepa_initiating_party_postal_address') !!}
+            {!! Former::text('sepa_initiating_party_identification') !!}
+            {!! Former::text('sepa_payment_method') !!}
+            {!! Former::text('sepa_payment_sequence_type') !!}
+            {!! Former::text('sepa_payment_iban') !!}
+            {!! Former::text('sepa_payment_bic') !!}
+            {!! Former::text('sepa_payment_creditor_id') !!}
+            {!! Former::text('sepa_end_to_end_current_id') !!}
+
+            </div>
+        </div>        
         </div>
 
 

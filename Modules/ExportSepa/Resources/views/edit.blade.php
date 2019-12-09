@@ -67,7 +67,9 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <div class="pull-left" style="margin-top:20px;">Showing 26 to 50 of 82 entries</div>
+                        <div class="pull-left" style="margin-top:20px;"
+                            data-bind="text: showingText">
+                        </div>
                         <div class="pull-right" data-bind="pagination: { 
                             currentPage: page, totalCount: total, pageSize: pageSize, maxPages: maxPages, 
                             directions: directions, boundary: boundary, text: text }"></div>
@@ -116,6 +118,13 @@
                 back: ko.observable('«'),
                 forward: ko.observable('»')
             };
+
+            this.showingText = ko.computed(() => {
+                let startNumber = (this.page() - 1) * this.pageSize() + 1;
+                let endNumber = this.page() * this.pageSize();
+                return `Showing ${startNumber} to ${endNumber > this.total() ? this.total() : endNumber} of ${this.total()} entries`;
+            });
+
             // =======            
             this.invoicesData = ko.observableArray([]);
             this.isCheckedAll = ko.observable(1);

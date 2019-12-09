@@ -10,7 +10,7 @@ class ExportSepaItem extends Model
     /**
      * @var string
      */
-    protected $fillable = ['exportsepa_id', 'invoice_id'];
+    protected $fillable = ['exportsepa_id', 'invoice_id', 'endtoendid'];
 
     /**
      * @var string
@@ -22,7 +22,7 @@ class ExportSepaItem extends Model
         return 'exportsepa_items';
     }
 
-    public function invoices() {
-        return $this->hasMany('App\Models\Invoices', 'invoice_id');
+    public function invoice() {
+        return $this->belongsTo('App\Models\Invoice');
     }
 }

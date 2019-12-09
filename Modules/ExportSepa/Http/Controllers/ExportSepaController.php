@@ -14,19 +14,24 @@ use Modules\ExportSepa\Http\Requests\CreateExportSepaRequest;
 use Modules\ExportSepa\Http\Requests\UpdateExportSepaRequest;
 use Modules\ExportSepa\Models\ExportSepa;
 
+use Modules\ExportSepa\Services\ExportSepaService;
+
 class ExportSepaController extends BaseController
 {
     protected $exportsepaRepo;
     protected $invoiceRepo;
+    protected $exportSepaService;
     //protected $entityType = 'exportsepa';
 
     public function __construct(ExportSepaRepository $exportsepaRepo,
-        InvoiceRepository $invoiceRepo)
+        InvoiceRepository $invoiceRepo,
+        ExportSepaService $exportSepaService)
     {
         //parent::__construct();
 
         $this->exportsepaRepo = $exportsepaRepo;
         $this->invoiceRepo = $invoiceRepo;
+        $this->exportSepaService = $exportSepaService;
     }
 
     /**
@@ -78,7 +83,7 @@ class ExportSepaController extends BaseController
     public function store(CreateExportSepaRequest $request)
     {
         $exportsepa = $this->exportsepaRepo->save($request->input());
-
+        $request->session()->flash('http_action', '/exportsepa/' . $exportsepa->id . '/generate-sepa');
         return redirect()->to('exportsepa')
             ->with('message', mtrans('exportsepa', 'created_exportsepa'));
     }
@@ -137,6 +142,16 @@ class ExportSepaController extends BaseController
             ->with('message', mtrans('exportsepa', $action . '_exportsepa_complete'));
     }
 
+    public function generateSepaXml(ExportSepaRequest $request)
+    {
+        $exportsepa = $request->entity();
+        $sepaData = $this->exportSepaService->getSepaData($exportsepa);
+        return response(view('exportsepa::sepa-xml', $sepaData), 200, [
+            'Content-Type' => 'text/xml',
+            'Content-Disposition' => 'attachment; filename="sepa.xml"',
+        ]);                
+    }
+
     protected function getInvoices()
     {
         $accountId = Auth::user()->account_id;  
@@ -163,5 +178,5 @@ class ExportSepaController extends BaseController
             ->orderBy('invoices.invoice_number')
             ->get();
 
-    }    
+    }
 }

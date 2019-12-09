@@ -60,15 +60,27 @@ class ExportsepaRepository extends BaseRepository
         
         $entity->save();
 
+        $account = $entity->account;
+        $endtoendid = $account->sepa_end_to_end_current_id;
         $invoiceIds = \App\Models\Invoice::scope()
             ->whereIn('public_id', $data['invoice_id'])
             ->get()
-            ->map(function($item) {
-                return ['invoice_id' => $item->id];
+            ->map(function($item) use ($account) {
+                $account->sepa_end_to_end_current_id += 1;
+                return [
+                    'invoice_id' => $item->id,
+                    'endtoendid' => $account->sepa_end_to_end_current_id
+                ];
             })
             ->all();
         if (count($invoiceIds)) {
             $entity->items()->createMany($invoiceIds);
+            foreach($entity->items as $item) {
+                \App\Models\Invoice::scope()
+                    ->where('id', $item->invoice_id)
+                    ->update(['invoice_status_id' => INVOICE_STATUS_PAID]);
+            }
+            $account->save();
         }
 
         /*

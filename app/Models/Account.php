@@ -176,6 +176,15 @@ class Account extends Eloquent
         'custom_value1',
         'custom_value2',
         'custom_messages',
+        'sepa_initiating_party_name',
+        'sepa_initiating_party_postal_address',
+        'sepa_initiating_party_identification',
+        'sepa_payment_method',
+        'sepa_payment_sequence_type',
+        'sepa_payment_iban',
+        'sepa_payment_bic',
+        'sepa_payment_creditor_id',
+        'sepa_end_to_end_current_id'
     ];
 
     /**
