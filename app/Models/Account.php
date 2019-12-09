@@ -184,7 +184,8 @@ class Account extends Eloquent
         'sepa_payment_iban',
         'sepa_payment_bic',
         'sepa_payment_creditor_id',
-        'sepa_end_to_end_current_id'
+        'sepa_end_to_end_current_id',
+        'sepa_invoice_purpose_prefix'
     ];
 
     /**

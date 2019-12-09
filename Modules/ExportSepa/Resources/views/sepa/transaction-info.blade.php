@@ -5,8 +5,8 @@
   <InstdAmt Ccy="EUR">{{ $transaction['amount'] }}</InstdAmt>
   <DrctDbtTx>
     <MndtRltdInf>
-      <MndtId>{{ $transaction['invoiceNumber'] }}</MndtId>
-      <DtOfSgntr>{{ $transaction['invoiceDate'] }}</DtOfSgntr>
+      <MndtId>{{ $transaction['sepa'] }}</MndtId>
+      <DtOfSgntr>{{ $transaction['sepaDate'] }}</DtOfSgntr>
     </MndtRltdInf>
   </DrctDbtTx>
   <DbtrAgt>
@@ -23,6 +23,6 @@
     </Id>
   </DbtrAcct>
   <RmtInf>
-    <Ustrd></Ustrd>
+    <Ustrd>{{ $transaction['ustrd'] }}</Ustrd>
   </RmtInf>  
 </DrctDbtTxInf>

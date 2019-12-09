@@ -3170,7 +3170,8 @@ $LANG = array(
     'sepa_payment_iban' => 'Payment IBAN',
     'sepa_payment_bic' => 'Payment BIC',
     'sepa_payment_creditor_id' => 'Payment creditor ID',
-    'sepa_end_to_end_current_id' => 'EndToEndCurrentId'
+    'sepa_end_to_end_current_id' => 'EndToEndCurrentId',
+    'sepa_invoice_purpose_prefix' => 'SEPA Invoice purpose prefix',
 );
 
 return $LANG;

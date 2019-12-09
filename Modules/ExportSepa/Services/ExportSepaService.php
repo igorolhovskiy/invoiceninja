@@ -39,15 +39,18 @@ class ExportSepaService
       'creditorBic' => $account->sepa_payment_bic,
       'chrgBr' => 'SLEV',
       'privateIdentificationId' => $account->sepa_payment_creditor_id,
-      'debitTransactionInfo' => $exportSepa->items->map(function($item) {
+      'debitTransactionInfo' => $exportSepa->items->map(function($item) use($account) {
         return [
           'endtoendid' => $item->endtoendid,
           'amount' => number_format($item->invoice->amount, 2),
           'invoiceNumber' => $item->invoice->invoice_number,
           'invoiceDate' => Carbon::parse($item->invoice->invoice_date)->toDateString(),
+          'sepa' => $item->invoice->client->sepa,
+          'sepaDate' => Carbon::parse($item->invoice->client->sepa_date)->toDateString(),
           'bic' => $item->invoice->client->bic,
           'iban' => $item->invoice->client->iban,
           'clientName' => $item->invoice->client->name,
+          'ustrd' => $account->sepa_invoice_purpose_prefix . '-' . $item->invoice->invoice_number
         ];
       })->all(),
     ];

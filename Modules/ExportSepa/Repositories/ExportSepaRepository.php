@@ -5,11 +5,17 @@ namespace Modules\ExportSepa\Repositories;
 use DB;
 use Modules\ExportSepa\Models\ExportSepa;
 use App\Ninja\Repositories\BaseRepository;
+use App\Ninja\Repositories\PaymentRepository;
 //use App\Events\ExportsepaWasCreated;
 //use App\Events\ExportsepaWasUpdated;
 
 class ExportsepaRepository extends BaseRepository
 {
+    public function __construct(PaymentRepository $paymentRepo)
+    {
+        $this->paymentRepo = $paymentRepo;
+    }
+
     public function getClassName()
     {
         return 'Modules\ExportSepa\Models\ExportSepa';
@@ -76,9 +82,13 @@ class ExportsepaRepository extends BaseRepository
         if (count($invoiceIds)) {
             $entity->items()->createMany($invoiceIds);
             foreach($entity->items as $item) {
-                \App\Models\Invoice::scope()
-                    ->where('id', $item->invoice_id)
-                    ->update(['invoice_status_id' => INVOICE_STATUS_PAID]);
+                $data = [
+                    'client_id' => $item->invoice->client_id,
+                    'invoice_id' => $item->invoice->id,
+                    'amount' => $item->invoice->balance,
+                    'payment_type_id' => PAYMENT_TYPE_SEPA
+                ];
+                $this->paymentRepo->save($data);
             }
             $account->save();
         }

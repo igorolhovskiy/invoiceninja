@@ -278,7 +278,6 @@
 						{!! Former::text('sepa')->label('sepa') !!}
 						{!! Former::text('sepa_date')
 							->label('Sepa date')
-							->data_date_format(Session::get(SESSION_DATE_PICKER_FORMAT, DEFAULT_DATE_PICKER_FORMAT))
 							->appendIcon('calendar')
 							->addGroupClass('sepa_date')
 						!!}
@@ -288,7 +287,9 @@
 						        ->value(1) !!}						
 							<script type="text/javascript">
 									$(function() {
-											$('#sepa_date').datepicker();
+											$('#sepa_date').datepicker({
+												format: 'yyyy-mm-dd'
+											});
 									});
 									$('.sepa_date .input-group-addon').click(function() {
 											toggleDatePicker('sepa_date');
