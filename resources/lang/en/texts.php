@@ -3161,7 +3161,17 @@ $LANG = array(
     'renumber_invoices' => 'Renumber invoices',
     'import_colt' => 'Import COLT',
     'type_colt' => 'Type COLT',
-    'cdr_is_attached_to_invoice' => 'CDR is attached to invoice'
+    'cdr_is_attached_to_invoice' => 'CDR is attached to invoice',
+    'sepa_initiating_party_name' => 'Initiating party name',
+    'sepa_initiating_party_postal_address' => 'Initiating party postal address',
+    'sepa_initiating_party_identification' => 'Initiating party identification',
+    'sepa_payment_method' => 'Payment method',
+    'sepa_payment_sequence_type' => 'Payment sequence type',
+    'sepa_payment_iban' => 'Payment IBAN',
+    'sepa_payment_bic' => 'Payment BIC',
+    'sepa_payment_creditor_id' => 'Payment creditor ID',
+    'sepa_end_to_end_current_id' => 'EndToEndCurrentId',
+    'sepa_invoice_purpose_prefix' => 'SEPA Invoice purpose prefix',
 );
 
 return $LANG;

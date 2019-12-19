@@ -545,5 +545,12 @@
 
 <p>&nbsp;</p>
 
+<script type="text/javascript">
+  $(function() {
+    @if (Session::has('http_action'))
+        window.open('{{ Session::get("http_action") }}', '_self');
+    @endif   
+  })
+</script>
 
 @stop

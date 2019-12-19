@@ -1,5 +1,10 @@
+@if (isset($bulkUrl))
+{!! Former::open($bulkUrl)
+		->addClass('listForm_' . $entityType) !!}
+@else
 {!! Former::open(\App\Models\EntityModel::getFormUrl($entityType) . '/bulk')
 		->addClass('listForm_' . $entityType) !!}
+@endif
 
 <div style="display:none">
 	{!! Former::text('action')->id('action_' . $entityType) !!}
@@ -15,7 +20,7 @@
 		@endcan
 	@endif
 
-	{!! DropdownButton::normal(trans('texts.archive'))
+	{!! DropdownButton::normal(isset($bulkButtonName) ? $bulkButtonName : trans('texts.archive'))
 			->withContents($datatable->bulkActions())
 			->withAttributes(['class'=>'archive'])
 			->split() !!}
@@ -119,7 +124,7 @@
 		{!! Button::normal(trans('texts.time_tracker'))->asLinkTo('javascript:openTimeTracker()')->appendIcon(Icon::create('time')) !!}
     @endif
 
-	@if (Auth::user()->can('create', $entityType) && empty($vendorId))
+	@if (Auth::user()->can('create', $entityType) && empty($vendorId) && !isset($hideCreateBtn))
     	{!! Button::primary(mtrans($entityType, "new_{$entityType}"))
 			->asLinkTo(url(
 				(in_array($entityType, [ENTITY_PROPOSAL_SNIPPET, ENTITY_PROPOSAL_CATEGORY, ENTITY_PROPOSAL_TEMPLATE]) ? str_replace('_', 's/', Utils::pluralizeEntityType($entityType)) : Utils::pluralizeEntityType($entityType)) .
@@ -246,7 +251,7 @@
 
 	    $('.listForm_{{ $entityType }} .archive, .invoice').prop('disabled', true);
 	    $('.listForm_{{ $entityType }} .archive:not(.dropdown-toggle)').click(function() {
-	        submitForm_{{ $entityType }}('archive');
+	        submitForm_{{ $entityType }}('{{ isset($bulkActionName) ? $bulkActionName : 'archive' }}');
 	    });
 
 	    $('.listForm_{{ $entityType }} .selectAll').click(function() {
@@ -254,7 +259,7 @@
 	    });
 
 	    function setBulkActionsEnabled_{{ $entityType }}() {
-	        var buttonLabel = "{{ trans('texts.archive') }}";
+	        var buttonLabel = "{{ isset($bulkButtonName) ? $bulkButtonName : trans('texts.archive') }}";
 	        var count = $('.listForm_{{ $entityType }} tbody :checkbox:checked').length;
 	        $('.listForm_{{ $entityType }} button.archive, .listForm_{{ $entityType }} button.invoice').prop('disabled', !count);
 	        if (count) {

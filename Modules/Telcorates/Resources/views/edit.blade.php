@@ -190,7 +190,7 @@
                 });
             };
 
-            this.removeCode = (code, index) => {
+            this.removeCode = (index) => {
                 this.codes.splice(index, 1);
                 if (!this.codes().length) {
                     this.addCode();

@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\ImportColt\;
+namespace Modules\ImportColt;
 
 use App\Providers\AuthServiceProvider;
 

@@ -1488,4 +1488,22 @@ class Utils
         $stacktrace = sprintf("%s %s %s \n", date('Y-m-d h:i:s'), $level, $message);
         file_put_contents(storage_path('logs/colt-service.log'), $stacktrace, FILE_APPEND);        
     }
+
+    public static function logAstppService($level, $message)
+    {
+        $stacktrace = sprintf("%s %s %s \n", date('Y-m-d h:i:s'), $level, $message);
+        file_put_contents(storage_path('logs/astpp-service.log'), $stacktrace, FILE_APPEND);        
+    }
+
+    public static function logColtRateNotFound($level, $message)
+    {
+        $stacktrace = sprintf("%s %s %s \n", date('Y-m-d h:i:s'), $level, $message);
+        file_put_contents(storage_path('logs/colt-rate-not-found.log'), $stacktrace, FILE_APPEND);           
+    }
+
+    public static function logAstppRateNotFound($level, $message)
+    {
+        $stacktrace = sprintf("%s %s %s \n", date('Y-m-d h:i:s'), $level, $message);
+        file_put_contents(storage_path('logs/astpp-rate-not-found.log'), $stacktrace, FILE_APPEND);           
+    }    
 }

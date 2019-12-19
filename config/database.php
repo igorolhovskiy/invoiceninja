@@ -104,6 +104,20 @@ return [
             'engine'    => 'InnoDB',
         ],
 
+        'db-astpp' => [
+            'driver'    => 'mysql',
+            'host'      => env('ASTPP_DB_HOST', 'localhost'),
+            'database'  => env('ASTPP_DB_DATABASE', 'astpp'),
+            'username'  => env('ASTPP_DB_USERNAME', 'astpp'),
+            'password'  => env('ASTPP_DB_PASSWORD', ''),
+            'port'      => env('ASTPP_DB_PORT', '3306'),
+            'charset'   => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix'    => '',
+            'strict'    => env('DB_STRICT', false),
+            'engine'    => null,
+        ],        
+
     ],
 
     /*
