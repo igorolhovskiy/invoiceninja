@@ -57,5 +57,21 @@ class CdrRepository extends BaseRepository
 
     public function findByAstppId($uniqueId) {
         return Cdr::where('astpp_cdr_uniqueid', $uniqueId)->first();
-    }    
+    }
+
+    public function findRateNotFoundImportColt($importColtId) {
+        return Cdr
+            ::where('import_colt_id', $importColtId)
+            ->where('status', 'RATE_NOT_FOUND')
+            ->get();
+    }
+
+    public function findRateNotFoundAstppClient($clientId, $startDate, $endDate) {
+        return Cdr
+        ::whereNotNull('astpp_cdr_uniqueid')
+        ->where('client_id', $client->id)
+        ->whereBetween('callstart', [$startDate, $endDate])
+        ->where('status', 'RATE_NOT_FOUND')
+        ->get();
+    }
 }

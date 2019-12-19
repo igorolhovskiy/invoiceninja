@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Bus\Queueable;
 
 use Modules\ImportColt\Services\ColtService;
+use App\Services\LogService;
 
 use Modules\ImportColt\Jobs\BillColtCalls;
 
@@ -36,7 +37,7 @@ class RateColtCalls implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ColtService $coltService)
+    public function handle(ColtService $coltService, LogService $logService)
     {
         Utils::logColtService('info', 'Start to rate cdrs for import_colt_id = ' . $this->importColtId . ' ...');
         try {
@@ -44,6 +45,9 @@ class RateColtCalls implements ShouldQueue
             $clientCount = $coltService->rateColtCalls($this->importColtId);
             echo 'cdrs are rated' . PHP_EOL;
             Utils::logColtService('info', 'Cdrs of ' . $clientCount . ' clients were rated.');
+
+            $logService->logColtRateNotFound($this->importColtId);
+
             dispatch(new BillColtCalls(\Auth::user(), $this->importColtId));
         } catch(\Exception $e) {
            echo 'ERROR:' . $e->getMessage() . PHP_EOL;

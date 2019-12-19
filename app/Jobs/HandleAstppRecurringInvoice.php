@@ -11,6 +11,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use App\Jobs\SendInvoiceEmail;
 use App\Models\Invoice;
 use App\Services\AstppService;
+use App\Services\LogService;
+
 use Auth;
 use Utils;
 
@@ -34,7 +36,7 @@ class HandleAstppRecurringInvoice implements ShouldQueue
      *
      * @return void
      */
-    public function handle(AstppService $astppService)
+    public function handle(AstppService $astppService, LogService $logService)
     {
         echo date('r'), ' Processing ASTPP Recuring invoice: ', $this->recurInvoice->id, PHP_EOL;
         Utils::logAstppService('info', '====================================');
@@ -55,6 +57,9 @@ class HandleAstppRecurringInvoice implements ShouldQueue
             $astppService->rateClientCalls($client);
             echo date('r'), ' Calls were rated', PHP_EOL;
             Utils::logAstppService('info', 'Calls were rated');
+
+            $logService->logAstppRateNotFound($client->id, $asttpPeriod['start'], $asttpPeriod['end']);
+
             echo date('r'), ' Bill Client by recurring invoice', PHP_EOL;
             Utils::logAstppService('info', 'Bill Client by recurring invoice');
             $invoice = $astppService->billClient($this->recurInvoice);
