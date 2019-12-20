@@ -39,7 +39,7 @@ class TelcoratesDatatable extends EntityDatatable
                     return URL::to("telcorates/{$model->public_id}/edit");
                 },
                 function ($model) {
-                    return Auth::user()->can('editByOwner', ['telcorates', $model->user_id]);
+                    return Auth::user()->can('edit', ['telcorates', $model->user_id]);
                 }
             ],
         ];

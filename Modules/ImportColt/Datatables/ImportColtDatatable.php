@@ -56,7 +56,7 @@ class ImportColtDatatable extends EntityDatatable
                     return "javascript:submitForm_importcolt('delete', {$model->public_id}, '{$confirmText}')";
                 },
                 function ($model) {
-                    return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
+                    return Auth::user()->can('edit', ['importcolt', $model->user_id]);
                 }
             ],            
             [
@@ -65,7 +65,7 @@ class ImportColtDatatable extends EntityDatatable
                     return URL::to("importcolt/{$model->public_id}/renumber-invoices");
                 },
                 function ($model) {
-                    return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
+                    return Auth::user()->can('edit', ['importcolt', $model->user_id]);
                 }
             ],
             [
@@ -75,7 +75,7 @@ class ImportColtDatatable extends EntityDatatable
                     return "javascript:submitForm_importcolt('emailInvoice', {$model->public_id}, '{$confirmText}')";
                 },
                 function ($model) {
-                    return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
+                    return Auth::user()->can('edit', ['importcolt', $model->user_id]);
                 }
             ],
             [
@@ -84,7 +84,7 @@ class ImportColtDatatable extends EntityDatatable
                     return URL::to("importcolt/{$model->public_id}/edit");
                 },
                 function ($model) {
-                    return Auth::user()->can('editByOwner', ['importcolt', $model->user_id]);
+                    return Auth::user()->can('edit', ['importcolt', $model->user_id]);
                 }
             ],                                    
         ];

@@ -1,5 +1,11 @@
 @extends('header')
 
+@section('head')
+	@parent
+    <script src="{{ asset('js/knockstrap.min.js') }}" type="text/javascript"></script>
+
+@stop
+
 @section('content')
 
     {!! Former::open($url)
@@ -26,7 +32,14 @@
                     ->onchange('checkName()')
                  !!}
 
-                <div class="row" style="margin-top: 32px;" data-bind="visible: codes().length">
+                 <div class="row" data-bind="visible: codes().length">
+                    <div class="col-12 col-md-4">
+                        <input type="search" class="form-control"
+                            data-bind="value: searchText, valueUpdate: 'afterkeydown'"
+                            placeholder="Search...">
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 16px;" data-bind="visible: codes().length">
                     <div class="col-md-2">
                         Code
                     </div>
@@ -43,61 +56,73 @@
                         Description
                     </div>
                 </div>
-                <div class="row" data-bind="foreach: codes">
-                    {!! Former::hidden('public_id')
-                        ->data_bind('value: id, attr: {name: \'codes[\' + $index() + \'][id]\'}')
-                    !!}
-                    <div class="col-md-2">
-                        <div class="form-group required">
-                            <div class="col-lg-12 col-sm-12">
-                                <input class="form-control" 
-                                    data-bind="value: code, attr: {name: 'codes[' + $index() + '][code]'}" 
-                                    required type="text">
-                            </div>
-                        </div>                        
+                <div data-bind="foreach: filteredCodes">
+                    <div class="row"
+                        data-bind="if: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize()">
+                        {!! Former::hidden('public_id')
+                            ->data_bind('value: id, attr: {name: \'codes[\' + $index() + \'][id]\'}')
+                        !!}
+                        <div class="col-md-2">
+                            <div class="form-group required">
+                                <div class="col-lg-12 col-sm-12">
+                                    <input class="form-control" 
+                                        data-bind="value: code, attr: {name: 'codes[' + $index() + '][code]'}" 
+                                        required type="text">
+                                </div>
+                            </div>                        
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="col-lg-12 col-sm-12">
+                                    <input class="form-control" 
+                                        data-bind="value: init_seconds, attr: {name: 'codes[' + $index() + '][init_seconds]'}" 
+                                        type="text">
+                                </div>
+                            </div>                    
+                        </div>  
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="col-lg-12 col-sm-12">
+                                    <input class="form-control" 
+                                        data-bind="value: increment_seconds, attr: {name: 'codes[' + $index() + '][increment_seconds]'}" 
+                                        type="text">
+                                </div>
+                            </div>                                           
+                        </div>     
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="col-lg-12 col-sm-12">
+                                    <input class="form-control" 
+                                        data-bind="value: rate, attr: {name: 'codes[' + $index() + '][rate]'}" 
+                                        type="text">
+                                </div>
+                            </div>                                          
+                        </div>                                                       
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <div class="col-lg-12 col-sm-12">
+                                    <input class="form-control" 
+                                        data-bind="value: description, attr: {name: 'codes[' + $index() + '][description]'}" 
+                                        type="text">
+                                </div>
+                            </div>                                          
+                        </div>
+                        <div class="col-md-1">
+                            {!! Button::danger()
+                                ->withAttributes(['data-bind' =>'click: $root.removeCode.bind($data)'])
+                                ->appendIcon('<i class="fa fa-times" aria-hidden="true"></i>')
+                            !!}     
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <div class="col-lg-12 col-sm-12">
-                                <input class="form-control" 
-                                    data-bind="value: init_seconds, attr: {name: 'codes[' + $index() + '][init_seconds]'}" 
-                                    type="text">
-                            </div>
-                        </div>                    
-                    </div>  
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <div class="col-lg-12 col-sm-12">
-                                <input class="form-control" 
-                                    data-bind="value: increment_seconds, attr: {name: 'codes[' + $index() + '][increment_seconds]'}" 
-                                    type="text">
-                            </div>
-                        </div>                                           
-                    </div>     
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <div class="col-lg-12 col-sm-12">
-                                <input class="form-control" 
-                                    data-bind="value: rate, attr: {name: 'codes[' + $index() + '][rate]'}" 
-                                    type="text">
-                            </div>
-                        </div>                                          
-                    </div>                                                       
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <div class="col-lg-12 col-sm-12">
-                                <input class="form-control" 
-                                    data-bind="value: description, attr: {name: 'codes[' + $index() + '][description]'}" 
-                                    type="text">
-                            </div>
-                        </div>                                          
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-4" style="margin-top:20px;"
+                        data-bind="text: showingText">
                     </div>
-                    <div class="col-md-1">
-                        {!! Button::danger()
-                            ->withAttributes(['data-bind' =>'click: $root.removeCode.bind($data, $index())'])
-                            ->appendIcon('<i class="fa fa-times" aria-hidden="true"></i>')
-                        !!}     
-                    </div>
+                    <div class="col-12 col-md-8 text-right" data-bind="pagination: { 
+                        currentPage: page, totalCount: total, pageSize: pageSize, maxPages: maxPages, 
+                        directions: directions, boundary: boundary, text: text }">
+                    </div>           
                 </div>
                 <div class="row">
                     <div class="col-md-12 text-center">
@@ -166,15 +191,16 @@
             return true;
         });
 
+        const pageSize = 10;
         const codes = @if ($telcorates) {!! $telcorates->codes !!} @else null @endif;
 
         function CodeViewModel() {
-
-            this.codes = ko.observableArray([]);     
-
+            this.codes = ko.observableArray([]);
+            this.searchText = ko.observable('');
             this.isCsvUploading = ko.observable(false);
 
             this.addCode = (code = null, checkValidity = true) => {
+                this.page(this.lastPage());
                 if (checkValidity && this.codes().length
                     && $.grep($('#telcorateForm [name^="codes"]'), item => !item.checkValidity()).length) {
                     $('#telcorateForm button[type=submit]')[0].click();
@@ -190,17 +216,53 @@
                 });
             };
 
-            this.removeCode = (index) => {
-                this.codes.splice(index, 1);
+            this.removeCode = (item) => {
+                this.codes.remove(item);
                 if (!this.codes().length) {
                     this.addCode();
                 }
             }
 
-            if (codes && codes.length) {
-                codes.forEach(code => this.addCode(code));
-            } else {
-                this.addCode();
+            this.filteredCodes = ko.computed(() => {
+                const searchText = this.searchText();
+                if (!searchText) {
+                    return this.codes();
+                }
+                return ko.utils.arrayFilter(this.codes(), item => 
+                        item.code && item.code.indexOf(searchText) !== -1
+                        || item.rate && item.rate.toString().indexOf(searchText) !== -1
+                        || item.description && item.description.indexOf(searchText) !== -1
+                        || (!item.id && !item.code && !item.init_seconds 
+                            && !item.rate && !item.description) // added item
+                    )
+            });
+
+            this.initPaginator = () => {
+                // Pagination model
+                this.page = ko.observable(1);
+                this.total = ko.computed(() => this.filteredCodes().length);
+                this.maxPages = ko.observable(5);
+                this.pageSize = ko.observable(pageSize);
+                this.directions = ko.observable(true);
+                this.boundary = ko.observable(true);
+                this.lastPage = ko.computed(() => Math.ceil(this.total() / this.pageSize()));
+                this.text = {
+                    first: ko.observable('First'),
+                    last: ko.observable('Last'),
+                    back: ko.observable('«'),
+                    forward: ko.observable('»')
+                };
+
+                this.showingText = ko.computed(() => {
+                    let startNumber = (this.page() - 1) * this.pageSize() + 1;
+                    let endNumber = this.page() * this.pageSize();
+                    return `Showing ${startNumber} to ${endNumber > this.total() ? this.total() : endNumber} of ${this.total()} entries`;
+                });
+
+                this.searchText.subscribe(() => {
+                    console.log('new search text code');
+                    this.page(1);
+                });
             }
 
             this.uploadCsv = (file) => {
@@ -233,7 +295,17 @@
                     }
                 }
                 return true;
-            } 
+            }
+
+            this.initPaginator();
+
+            if (codes && codes.length) {
+                codes.forEach(code => this.addCode(code));
+                this.page(1);
+            } else {
+                this.addCode();
+            }
+             
         }
 
         ko.applyBindings(new CodeViewModel());

@@ -49,7 +49,7 @@ class TelcopackagesDatatable extends EntityDatatable
                     return URL::to("telcopackages/{$model->public_id}/edit");
                 },
                 function ($model) {
-                    return Auth::user()->can('editByOwner', ['telcopackages', $model->user_id]);
+                    return Auth::user()->can('edit', ['telcopackages', $model->user_id]);
                 }
             ],
         ];

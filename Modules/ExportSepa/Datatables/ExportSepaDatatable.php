@@ -45,8 +45,7 @@ class ExportSepaDatatable extends EntityDatatable
                     return URL::to("exportsepa/{$model->public_id}");
                 },
                 function ($model) {
-                    // return Auth::user()->can('editByOwner', ['exportsepa', $model->user_id]);
-                    return true;
+                    return Auth::user()->can('edit', ['exportsepa', $model->user_id]);
                 }
             ],
             [
@@ -55,8 +54,7 @@ class ExportSepaDatatable extends EntityDatatable
                     return URL::to("exportsepa/{$model->public_id}/generate-sepa");
                 },
                 function ($model) {
-                    // return Auth::user()->can('editByOwner', ['exportsepa', $model->user_id]);
-                    return true;
+                    return Auth::user()->can('edit', ['exportsepa', $model->user_id]);
                 }
             ],            
         ];
