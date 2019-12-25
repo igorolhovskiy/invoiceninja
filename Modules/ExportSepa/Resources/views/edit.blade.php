@@ -95,6 +95,7 @@
         {!! Button::success(trans('texts.export'))
                 ->submit()
                 ->large()
+                ->withAttributes(['data-bind' => "disable: !hasChecked()"])
                 ->appendIcon(Icon::create('floppy-disk')) !!}
         @endif
     </center>
@@ -137,7 +138,7 @@
             if (invoices && invoices.length) {
                 invoices.forEach((invoice) => {
                     this.invoicesData.push({
-                        isChecked: ko.observable(true),
+                        isChecked: ko.observable(invoice.is_filled_sepa_data),
                         ...invoice
                     });
                 });
@@ -145,9 +146,17 @@
 
             this.isCheckedAll.subscribe((newValue) => {
                 for (let i = 0; i < this.invoicesData().length; i++) {
-                    this.invoicesData()[i].isChecked(newValue);
+                    if (this.invoicesData()[i].is_filled_sepa_data) {
+                        this.invoicesData()[i].isChecked(newValue);
+                    }
                 }
-            })
+            });
+
+            this.hasChecked = ko.computed(() => {
+                return this.invoicesData()
+                    .filter(item => item.isChecked())
+                    .length > 0;
+            });            
         }
 
         ko.applyBindings(new ViewModel());
