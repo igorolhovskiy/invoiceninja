@@ -32,6 +32,9 @@
                     ->onchange('checkName()')
                  !!}
 
+                 {!! Former::text('description')
+                    ->addGroupClass('rate-description')
+                 !!}
                  <div class="row" data-bind="visible: codes().length">
                     <div class="col-12 col-md-4">
                         <input type="search" class="form-control"

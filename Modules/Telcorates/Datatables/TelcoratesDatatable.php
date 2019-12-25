@@ -22,6 +22,12 @@ class TelcoratesDatatable extends EntityDatatable
                 }
             ],
             [
+                'description',
+                function ($model) {
+                    return $model->description;
+                }
+            ],            
+            [
                 'created_at',
                 function ($model) {
                     return Utils::fromSqlDateTime($model->created_at);

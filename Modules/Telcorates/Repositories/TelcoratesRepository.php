@@ -27,7 +27,8 @@ class TelcoratesRepository extends BaseRepository
         $query = DB::table('telcorates')
                     ->where('telcorates.account_id', '=', \Auth::user()->account_id)
                     ->select(
-                        'telcorates.name', 
+                        'telcorates.name',
+                        'telcorates.description',
                         'telcorates.public_id',
                         'telcorates.deleted_at',
                         'telcorates.created_at',
@@ -42,7 +43,8 @@ class TelcoratesRepository extends BaseRepository
         }
 
         if ($filter) {
-            $query->where('name', 'like', "%$filter%");
+            $query->where('name', 'like', "%$filter%")
+                ->orWhere('description', 'like', "%$filter%");
         }
 
         return $query;

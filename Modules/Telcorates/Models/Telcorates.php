@@ -19,7 +19,7 @@ class Telcorates extends EntityModel
     /**
      * @var string
      */
-    protected $fillable = ["name"];
+    protected $fillable = ["name", "description"];
 
     /**
      * @var string
@@ -31,7 +31,7 @@ class Telcorates extends EntityModel
      *
      * @var array
      */
-    protected $appends = ['product_type', 'product_key'];
+    protected $appends = ['product_type', 'product_key', 'notes'];
 
     public function getEntityType()
     {
@@ -51,6 +51,10 @@ class Telcorates extends EntityModel
         return $this->attributes['name'];
     }
     
+    public function getNotesAttribute() {
+        return $this->attributes['description'];
+    }
+
     /**
      * @param $key
      *

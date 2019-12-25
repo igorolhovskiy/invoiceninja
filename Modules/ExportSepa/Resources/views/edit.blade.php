@@ -54,7 +54,7 @@
                                             <input type="checkbox" data-bind="checked: isChecked">
                                         </label>
                                         <span data-bind="if: !is_filled_sepa_data"
-                                            data-toggle="tooltip" title="Please, feel SEPA data for client!"
+                                            data-toggle="tooltip" title="Please, fill SEPA data for client!"
                                         >
                                             <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
                                         </span>
