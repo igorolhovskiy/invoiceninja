@@ -180,6 +180,7 @@ class ExportSepaController extends BaseController
                       ->whereRaw('exportsepa_items.invoice_id = invoices.id')
                       ->where('exportsepa_items.exportsepa_id', $exportsepa->id);
             })
+            ->addSelect(DB::raw('true as is_filled_sepa_data'))
             ->orderBy('invoices.invoice_number')
             ->get();
 
