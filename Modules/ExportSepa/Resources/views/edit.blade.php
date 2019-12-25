@@ -45,13 +45,19 @@
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: invoicesData">
-                                <tr role="row" 
-                                    data-bind="if: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize()">
+                                <tr role="row"
+                                    data-bind="if: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize(),
+                                        css: {'alert alert-danger': !is_filled_sepa_data}">
                                     @if ($method === 'POST')
                                     <td>
-                                        <label>
+                                        <label data-bind="if: is_filled_sepa_data">
                                             <input type="checkbox" data-bind="checked: isChecked">
                                         </label>
+                                        <span data-bind="if: !is_filled_sepa_data"
+                                            data-toggle="tooltip" title="Please, feel SEPA data for client!"
+                                        >
+                                            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                                        </span>
                                         <div data-bind="if: isChecked()">
                                             <input data-bind="value: public_id"
                                                 name="invoice_id[]" type="hidden">
