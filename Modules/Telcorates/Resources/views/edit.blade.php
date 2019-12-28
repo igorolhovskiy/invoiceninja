@@ -61,7 +61,7 @@
                 </div>
                 <div data-bind="foreach: filteredCodes">
                     <div class="row"
-                        data-bind="if: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize()">
+                        data-bind="visible: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize()">
                         {!! Former::hidden('public_id')
                             ->data_bind('value: id, attr: {name: \'codes[\' + $index() + \'][id]\'}')
                         !!}

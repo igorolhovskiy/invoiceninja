@@ -46,7 +46,7 @@
                             </thead>
                             <tbody data-bind="foreach: invoicesData">
                                 <tr role="row"
-                                    data-bind="if: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize(),
+                                    data-bind="visible: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize(),
                                         css: {'alert alert-danger': !is_filled_sepa_data}">
                                     @if ($method === 'POST')
                                     <td>
