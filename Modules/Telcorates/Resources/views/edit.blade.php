@@ -203,7 +203,9 @@
             this.isCsvUploading = ko.observable(false);
 
             this.addCode = (code = null, checkValidity = true) => {
-                this.page(this.lastPage());
+                if (this.lastPage() > 0) {
+                    this.page(this.lastPage());
+                }
                 if (checkValidity && this.codes().length
                     && $.grep($('#telcorateForm [name^="codes"]'), item => !item.checkValidity()).length) {
                     $('#telcorateForm button[type=submit]')[0].click();
@@ -263,7 +265,6 @@
                 });
 
                 this.searchText.subscribe(() => {
-                    console.log('new search text code');
                     this.page(1);
                 });
             }
@@ -301,7 +302,6 @@
             }
 
             this.initPaginator();
-
             if (codes && codes.length) {
                 codes.forEach(code => this.addCode(code));
                 this.page(1);
