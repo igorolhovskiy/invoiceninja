@@ -114,6 +114,10 @@ class TelcoratesController extends BaseController
     {
         $telcorates = $this->telcoratesRepo->save($request->input(), $request->entity());
 
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => mtrans('telcorates', 'updated_telcorates')
+        // ]);
         return redirect()->to($telcorates->present()->editUrl)
             ->with('message', mtrans('telcorates', 'updated_telcorates'));
     }

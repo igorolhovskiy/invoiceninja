@@ -59,7 +59,7 @@
                         Description
                     </div>
                 </div>
-                <div data-bind="foreach: filteredCodes">
+                <div data-bind="foreach: {data: filteredCodes, afterRender: handleAfterAllRender}" id="rowsContainer">
                     <div class="row"
                         data-bind="visible: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize()">
                         {!! Former::hidden('public_id')
@@ -165,42 +165,26 @@
                 ->asLinkTo(URL::to('/telcorates'))
                 ->appendIcon(Icon::create('remove-circle')) !!}
 
-        {!! Button::success(trans('texts.save'))
-                ->withAttributes(['id' =>'formSubmitButton'])
-                ->submit()
-                ->large()
-                ->appendIcon(Icon::create('floppy-disk')) !!}
-
+        <button type="submit" class="btn btn-success btn-lg" id="formSubmitButton" 
+            data-bind="disable: isSubmitting">
+            <span data-bind="text: isSubmitting() ? `Saving...` : `Save`"></span>
+            <span class="glyphicon glyphicon-floppy-disk"></span>
+        </button>
     </center>
 
     {!! Former::close() !!}
 
 
     <script type="text/javascript">
-
-        $(function() {
-            $(".warn-on-exit input").first().focus();
-        })
-
-        $('form').submit(function() {
-            // check name is unique
-            checkName(true);
-            if ($('.rate-name').hasClass('has-error')) {
-                return false;
-            }            
-            $('#formSubmitButton')
-                .prop("disabled", true)
-                .text('Saving...');
-            return true;
-        });
-
         const pageSize = 10;
         const codes = @if ($telcorates) {!! $telcorates->codes !!} @else null @endif;
+        let model = null;
 
         function CodeViewModel() {
             this.codes = ko.observableArray([]);
             this.searchText = ko.observable('');
             this.isCsvUploading = ko.observable(false);
+            this.isSubmitting = ko.observable(false);
 
             this.addCode = (code = null, checkValidity = true) => {
                 if (this.lastPage() > 0) {
@@ -241,6 +225,12 @@
                             && !item.rate && !item.description) // added item
                     )
             });
+
+            this.handleAfterAllRender = (node) => {
+                if ($('#rowsContainer').children().length === this.filteredCodes().length) {
+                    $( document ).trigger( "codesRenderingCompleted");
+                }
+            }
 
             this.initPaginator = () => {
                 // Pagination model
@@ -310,8 +300,35 @@
             }
              
         }
+        
+        model = new CodeViewModel();
+        ko.applyBindings(model);
 
-        ko.applyBindings(new CodeViewModel());
+        $(function() {
+            $(".warn-on-exit input").first().focus();
+        })
+
+        $('form').submit(function(event) {
+            console.log('submit');
+            const form = this;
+            event.preventDefault();
+            model.isSubmitting(true);            
+            // check name is unique
+            checkName(true);
+            if ($('.rate-name').hasClass('has-error')) {
+                return false;
+            }
+            // If filter is not empty we remove filter and wait render all codes
+            if (model.searchText()) {
+                $( document ).one( "codesRenderingCompleted", function() {
+                    form.submit();
+                });            
+                model.searchText('');
+            } else {
+                form.submit();
+            }
+            return true;
+        });
 
         function parseCsv(data) {
             const codes = [];
