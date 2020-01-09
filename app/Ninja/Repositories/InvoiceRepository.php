@@ -741,22 +741,21 @@ class InvoiceRepository extends BaseRepository
 
             if (Auth::check()) {
                 if ($productKey = trim($item['product_key'])) {
+                    switch ($item['product_type']) {
+                        case 'telcopackages':
+                            $product = Telcopackages::findProductByKey($productKey);
+                            break;
+                        case 'telcorates':
+                            $product = Telcorates::findProductByKey($productKey);
+                            break;
+                        default:
+                            $product = Product::findProductByKey($productKey);
+                    }
                     if ($account->update_products
                         && ! $invoice->has_tasks
                         && ! $invoice->has_expenses
                         && ! in_array($productKey, Utils::trans(['surcharge', 'discount', 'fee', 'gateway_fee_item']))
                     ) {
-                        switch ($item['product_type']) {
-                            case 'telcopackages':
-                                $product = Telcopackages::findProductByKey($productKey);
-                                break;
-                            case 'telcorates':
-                                $product = Telcorates::findProductByKey($productKey);
-                                break;
-                            default:
-                                $product = Product::findProductByKey($productKey);
-                        }
-
                         if (! $product) {
                             if (Auth::user()->can('create', ENTITY_PRODUCT)) {
                                 $product = Product::createNew();
