@@ -618,6 +618,36 @@ class Client extends EntityModel
     {
         return $this->hasMany('App\Models\Cdr');
     }
+
+    public function colt_dids()
+    {
+        return $this->hasMany('App\Models\ClientColtDid');
+    }
+
+    public function getColtDidsAttribute($value)
+    {
+        return $this->colt_dids()
+            ->get()
+            ->implode('did', ', ');
+    }
+
+    public function setColtDidsAttribute($value)
+    {
+        $dids = array_map(function($item) {
+            return trim($item);
+        }, preg_split("/[,;]+/", $value));
+
+        foreach($dids as $did) {
+            if ($this->colt_dids()->where('did', $did)->first() === null) {
+                $this->colt_dids()->create([
+                    'did' => $did
+                ]);
+            }
+        }
+        $this->colt_dids()
+            ->whereNotIn('did', $dids)
+            ->delete();
+    }    
 }
 
 Client::creating(function ($client) {

@@ -54,7 +54,9 @@ class StartRateMachine extends Command
             ->orderBy('id')
             ->get();
         
-        $rateMachineService->initMachine($client);
+        if (!$rateMachineService->initMachine($client)) {
+            throw new \Exception('Init rate machine return False for client ' . $client->id);
+        }
         foreach ($cdrs as $cdr) {
             $cdr = $rateMachineService->calculateCall($cdr);
             $this->info("Date:{$cdr->datetime} did:{$cdr->did}, dst:{$cdr->dst}, dur:{$cdr->dur}, cost:{$cdr->cost}, status:{$cdr->status}, done:{$cdr->done}");

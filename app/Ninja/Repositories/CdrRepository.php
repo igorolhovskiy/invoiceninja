@@ -3,6 +3,8 @@
 namespace App\Ninja\Repositories;
 
 use App\Models\Cdr;
+use App\Models\ClientColtDid;
+use App\Models\Clients;
 
 use DB;
 use Utils;
@@ -43,16 +45,26 @@ class CdrRepository extends BaseRepository
 
     public function updateClient()
     {
-        return DB::update('update `cdrs` inner join `clients` ' 
-            . "on cdrs.did REGEXP CONCAT('^(',"
-                . " REPLACE("
-                . "REPLACE(REPLACE(colt_dids, ' ', ''), ';',','),"  // remove space and update ; to ,
-                . " ',' , '[[:digit:]]*)|('),"
-                . " '[[:digit:]]*)$') "
-            . 'set `cdrs`.`client_id` = clients.id ' 
-            . 'where `cdrs`.`account_id` = ? and `clients`.`account_id` = ? '
-            . 'and cdrs.client_id is null',
-            [\Auth::user()->account_id, \Auth::user()->account_id]);
+        $cdrs = Cdr::scope()
+            ->whereNotNull('import_colt_id')
+            ->whereNull('client_id')
+            ->get();
+        $numberUpdatedRows = 0;
+        foreach($cdrs as $cdr) {
+            $client = ClientColtDid
+                ::select('client_id')
+                ->join('clients', 'client_colt_dids.client_id', '=', 'clients.id')
+                ->where('account_id', \Auth::user()->account_id)
+                ->whereRaw("'{$cdr->did}' like CONCAT(did, '%')")
+                ->orderByRaw('LENGTH(did) DESC')
+                ->first();
+            if ($client) {
+                $cdr->client_id = $client->client_id;
+                $cdr->save();
+                $numberUpdatedRows++;
+            }
+        }
+        return $numberUpdatedRows;
     }
 
     public function findByAstppId($uniqueId) {

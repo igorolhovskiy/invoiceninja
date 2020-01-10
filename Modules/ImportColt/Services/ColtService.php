@@ -109,7 +109,9 @@ class ColtService
             ->orderBy('id')
             ->get();
         
-        $this->rateMachineService->initMachine($client);
+        if (!$this->rateMachineService->initMachine($client)) {
+            throw new \Exception('Init rate machine return False for client ' . $client->id);
+        }
         foreach ($cdrs as $cdr) {
             $cdr = $this->rateMachineService->calculateCall($cdr);
             $cdr->save();

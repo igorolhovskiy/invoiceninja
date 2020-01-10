@@ -89,7 +89,9 @@ class AstppService
         ->orderBy('id')
         ->get();
     
-    $this->rateMachineService->initMachine($client, INVOICE_ITEM_CATEGORY_ASTPP);
+    if (!$this->rateMachineService->initMachine($client, INVOICE_ITEM_CATEGORY_ASTPP)) {
+      throw new \Exception('Init rate machine return False for client ' . $client->id);
+    }
     foreach ($cdrs as $cdr) {
         $cdr = $this->rateMachineService->calculateCall($cdr);
         $cdr->save();
