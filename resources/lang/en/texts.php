@@ -3161,6 +3161,7 @@ $LANG = array(
     'renumber_invoices' => 'Renumber invoices',
     'import_colt' => 'Import COLT',
     'type_colt' => 'Type COLT',
+    'type_ordinary' => 'Type Ordinary',    
     'cdr_is_attached_to_invoice' => 'CDR is attached to invoice',
     'sepa_initiating_party_name' => 'Initiating party name',
     'sepa_initiating_party_postal_address' => 'Initiating party postal address',

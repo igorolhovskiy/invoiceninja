@@ -127,7 +127,10 @@ class InvoiceRepository extends BaseRepository
                 }
                 if (in_array(INVOICE_TYPE_COLT, $statuses)) {
                     $query->orWhere('invoices.invoice_category_id', '=', INVOICE_ITEM_CATEGORY_COLT);
-                }                               
+                }
+                if (in_array(INVOICE_TYPE_ORDINARY, $statuses)) {
+                    $query->orWhere('invoices.invoice_category_id', '=', INVOICE_ITEM_CATEGORY_ORDINARY);
+                }                                              
             });
         }
 

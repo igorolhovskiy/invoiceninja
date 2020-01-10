@@ -74,6 +74,7 @@ class Invoice extends EntityModel implements BalanceAffecting
         STATUS_ARCHIVED,
         STATUS_DELETED,
         INVOICE_STATUS_IMPORT_COLT,
+        INVOICE_TYPE_ORDINARY,
         INVOICE_TYPE_COLT,
     ];
     
