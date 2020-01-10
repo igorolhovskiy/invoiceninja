@@ -6,6 +6,7 @@ use App\Jobs\PurgeClientData;
 use App\Events\ClientWasCreated;
 use App\Events\ClientWasUpdated;
 use App\Models\Client;
+use App\Models\ClientColtDid;
 use App\Models\Contact;
 use Auth;
 use Cache;
@@ -234,13 +235,13 @@ class ClientRepository extends BaseRepository
         return ($clientId && isset($map[$clientId])) ? $map[$clientId] : null;
     }
 
-    public function getClientByDid($did) {
-        return Client::scope()
-            ->whereRaw("$did REGEXP CONCAT('^(',"
-            . " REPLACE("
-            . "REPLACE(REPLACE(colt_dids, ' ', ''), ';',','),"  // remove space and update ; to ,
-            . " ',' , '[[:digit:]]*)|('),"
-            . " '[[:digit:]]*)$') ")
-            ->first();
+    public function getClientIdByDid($did) {
+        return ClientColtDid
+                ::select('client_id')
+                ->join('clients', 'client_colt_dids.client_id', '=', 'clients.id')
+                ->where('account_id', \Auth::user()->account_id)
+                ->whereRaw("'{$did}' like CONCAT(did, '%')")
+                ->orderByRaw('LENGTH(did) DESC')
+                ->value('client_id');
     }
 }

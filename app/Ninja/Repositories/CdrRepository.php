@@ -11,6 +11,12 @@ use Utils;
 
 class CdrRepository extends BaseRepository
 {
+    protected $clientRepo;
+
+    public function __construct(ClientRepository $clientRepo)
+    {
+        $this->clientRepo = $clientRepo;
+    }
 
     public function getClassName()
     {
@@ -51,15 +57,9 @@ class CdrRepository extends BaseRepository
             ->get();
         $numberUpdatedRows = 0;
         foreach($cdrs as $cdr) {
-            $client = ClientColtDid
-                ::select('client_id')
-                ->join('clients', 'client_colt_dids.client_id', '=', 'clients.id')
-                ->where('account_id', \Auth::user()->account_id)
-                ->whereRaw("'{$cdr->did}' like CONCAT(did, '%')")
-                ->orderByRaw('LENGTH(did) DESC')
-                ->first();
-            if ($client) {
-                $cdr->client_id = $client->client_id;
+            $clientId = $this->clientRepo->getClientIdByDid($cdr->did);
+            if ($clientId) {
+                $cdr->client_id = $clientId;
                 $cdr->save();
                 $numberUpdatedRows++;
             }

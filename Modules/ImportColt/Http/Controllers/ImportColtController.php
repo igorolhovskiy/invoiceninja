@@ -228,7 +228,9 @@ class ImportColtController extends BaseController
             $coltFile = $request->name->store('colt-files');            
             $coltData = $this->coltService->parseColtFile($coltFile, true);
             foreach ($coltData as $index => $data) {
-                $coltData[$index]['client'] = $this->clientRepository->getClientByDid($data['did']);
+                $clientId = $this->clientRepository->getClientIdByDid($data['did']);
+                $coltData[$index]['client'] = $clientId
+                    ? \App\Models\Client::scope()->find($clientId) : null;
             }
         } catch(\Exception $e) {
             return response()->json([
