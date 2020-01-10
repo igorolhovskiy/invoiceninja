@@ -638,6 +638,9 @@ class Client extends EntityModel
         }, preg_split("/[,;]+/", $value));
 
         foreach($dids as $did) {
+            if (strlen($did) === 0 || !ctype_digit($did)) {
+                continue;
+            }
             if ($this->colt_dids()->where('did', $did)->first() === null) {
                 $this->colt_dids()->create([
                     'did' => $did

@@ -110,6 +110,7 @@ class ColtService
             ->get();
         
         if (!$this->rateMachineService->initMachine($client)) {
+            Utils::logColtService('error', 'Init rate machine return False for client ' . $client->id);
             throw new \Exception('Init rate machine return False for client ' . $client->id);
         }
         foreach ($cdrs as $cdr) {
