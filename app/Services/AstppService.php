@@ -91,7 +91,6 @@ class AstppService
     
     if (!$this->rateMachineService->initMachine($client, INVOICE_ITEM_CATEGORY_ASTPP)) {
       Utils::logAstppService('error', 'Init rate machine return False for client ' . $client->id);
-      throw new \Exception('Init rate machine return False for client ' . $client->id);
     }
     foreach ($cdrs as $cdr) {
         $cdr = $this->rateMachineService->calculateCall($cdr);
