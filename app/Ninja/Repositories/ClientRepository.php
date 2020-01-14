@@ -240,6 +240,7 @@ class ClientRepository extends BaseRepository
                 ::select('client_id')
                 ->join('clients', 'client_colt_dids.client_id', '=', 'clients.id')
                 ->where('account_id', \Auth::user()->account_id)
+                ->whereNull('clients.deleted_at')
                 ->whereRaw("'{$did}' like CONCAT(did, '%')")
                 ->orderByRaw('LENGTH(did) DESC')
                 ->value('client_id');
