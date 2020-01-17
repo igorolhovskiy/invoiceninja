@@ -81,7 +81,7 @@ class CdrRepository extends BaseRepository
     public function findRateNotFoundAstppClient($clientId, $startDate, $endDate) {
         return Cdr
         ::whereNotNull('astpp_cdr_uniqueid')
-        ->where('client_id', $client->id)
+        ->where('client_id', $clientId)
         ->whereBetween('callstart', [$startDate, $endDate])
         ->where('status', 'RATE_NOT_FOUND')
         ->get();
