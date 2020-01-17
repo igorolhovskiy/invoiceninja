@@ -82,7 +82,7 @@ class CdrRepository extends BaseRepository
         return Cdr
         ::whereNotNull('astpp_cdr_uniqueid')
         ->where('client_id', $clientId)
-        ->whereBetween('callstart', [$startDate, $endDate])
+        ->whereBetween('datetime', [$startDate, $endDate])
         ->where('status', 'RATE_NOT_FOUND')
         ->get();
     }
