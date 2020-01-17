@@ -154,7 +154,7 @@ class ColtService
             ->whereNull('invoice_id')
             ->first();
         $coltInvoice = \App\Models\Invoice::scope()
-            ->with('invoice_items')
+            ->with('invoice_items', 'account.timezone')
             ->where('client_id', $client->id)
             ->where('invoice_category_id', INVOICE_ITEM_CATEGORY_COLT)
             ->first();
@@ -182,8 +182,28 @@ class ColtService
         $invoice = $account->createInvoice(ENTITY_INVOICE, $client->id);
         $invoice->public_id = 0;
         $invoice->import_colt_id = $importColtId;
+
         $importColt = $this->importColtRepository->getById($importColtId);
         $invoice->invoice_date = $importColt->invoice_date;
+        
+        $invoice->discount = $coltInvoice->discount;
+        $invoice->po_number = $coltInvoice->po_number;
+        $invoice->public_notes = Utils::processVariables($coltInvoice->public_notes, $client);
+        $invoice->terms = Utils::processVariables($coltInvoice->terms ?: $coltInvoice->account->invoice_terms, $client);
+        $invoice->invoice_footer = Utils::processVariables($coltInvoice->invoice_footer ?: $coltInvoice->account->invoice_footer, $client);
+        $invoice->tax_name1 = $coltInvoice->tax_name1;
+        $invoice->tax_rate1 = $coltInvoice->tax_rate1;
+        $invoice->tax_name2 = $coltInvoice->tax_name2;
+        $invoice->tax_rate2 = $coltInvoice->tax_rate2;
+        $invoice->invoice_design_id = $coltInvoice->invoice_design_id;
+        $invoice->custom_value1 = $coltInvoice->custom_value1 ?: 0;
+        $invoice->custom_value2 = $coltInvoice->custom_value2 ?: 0;
+        $invoice->custom_taxes1 = $coltInvoice->custom_taxes1 ?: 0;
+        $invoice->custom_taxes2 = $coltInvoice->custom_taxes2 ?: 0;
+        $invoice->custom_text_value1 = Utils::processVariables($coltInvoice->custom_text_value1, $client);
+        $invoice->custom_text_value2 = Utils::processVariables($coltInvoice->custom_text_value2, $client);
+        $invoice->is_amount_discount = $coltInvoice->is_amount_discount;
+
         if (!empty($coltInvoice->due_date)) {
             $invoice->due_date = Utils::toSqlDate(
                 Carbon::parse($importColt->invoice_date)
