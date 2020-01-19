@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Storage;
 use App\Ninja\Repositories\ClientRepository;
 use App\Ninja\Repositories\CdrRepository;
 use Modules\ImportColt\Repositories\ImportColtRepository;
+use App\Ninja\Repositories\InvoiceRepository;
 
 use App\Services\RateMachineService;
-use App\Services\InvoiceService;
 
 class ColtService
 {
@@ -19,7 +19,7 @@ class ColtService
     protected $cdrRepository;
     protected $rateMachineService;
     protected $importColtRepository;
-    protected $invoiceService;
+    protected $invoiceRepo;
 
     private $srcPatterns;
     private $dstPatterns;
@@ -28,13 +28,13 @@ class ColtService
         CdrRepository $cdrRepository,
         ImportColtRepository $importcoltRepo,
         RateMachineService $rateMachineService,
-        InvoiceService $invoiceService) {
+        InvoiceRepository $invoiceRepo) {
 
         $this->clientRepository = $clientRepository;
         $this->cdrRepository = $cdrRepository;
         $this->rateMachineService = $rateMachineService;
         $this->importColtRepository = $importcoltRepo;
-        $this->invoiceService = $invoiceService;
+        $this->invoiceRepo = $invoiceRepo;
 
         $this->dstPatterns = array(
             array('^0([1-9])(\d+)', '43$1$2'), // Austria National
@@ -154,7 +154,7 @@ class ColtService
             ->whereNull('invoice_id')
             ->first();
         $coltInvoice = \App\Models\Invoice::scope()
-            ->with('invoice_items', 'account.timezone')
+            ->with('account.timezone', 'invoice_items', 'client', 'user')
             ->where('client_id', $client->id)
             ->where('invoice_category_id', INVOICE_ITEM_CATEGORY_COLT)
             ->first();
@@ -180,6 +180,7 @@ class ColtService
 
         $account = \Auth::user()->account;        
         $invoice = $account->createInvoice(ENTITY_INVOICE, $client->id);
+
         $invoice->public_id = 0;
         $invoice->import_colt_id = $importColtId;
 
@@ -238,7 +239,9 @@ class ColtService
             }
         }
         $data = $invoice->toArray();
-        $invoice = $this->invoiceService->save($data);
+
+        $invoice = $this->invoiceRepo->save($data);
+
         \App\Models\Cdr::scope()
             ->whereNotNull('import_colt_id')
             ->where('client_id', $client->id)
