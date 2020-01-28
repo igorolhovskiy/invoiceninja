@@ -159,6 +159,7 @@ class ExportSepaController extends BaseController
             ->getInvoices($accountId)
             ->where('invoices.invoice_type_id', '=', INVOICE_TYPE_STANDARD)
             ->whereNotIn('invoice_status_id', [INVOICE_STATUS_DRAFT, INVOICE_STATUS_PAID])
+            ->where('clients.sepa_enable', '=', 1)
             ->addSelect(DB::raw(
                 "(CASE WHEN IFNULL(sepa, '') = '' OR IFNULL(sepa_date, '') = '' "
                 . " OR IFNULL(bic, '') = '' or IFNULL(iban, '') = '' "

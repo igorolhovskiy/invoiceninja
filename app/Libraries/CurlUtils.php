@@ -49,9 +49,12 @@ class CurlUtils
             return false;
         }
 
-        $client = Client::getInstance();
+        $client = Client::getInstance();          
         $client->isLazy();
-        //$client->getEngine()->addOption("--ignore-ssl-errors=true");
+        $client->getEngine()->addOption("--ignore-ssl-errors=true");
+        $client->getEngine()->addOption("--ssl-protocol=tlsv1");
+        $client->getEngine()->addOption("--web-security=false");     
+        $client->getEngine()->addOption("--disk-cache-path=" . sys_get_temp_dir());
         $client->getEngine()->setPath($path);
 
         $request = $client->getMessageFactory()->createRequest($url, $method);

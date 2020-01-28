@@ -281,6 +281,10 @@
 							->appendIcon('calendar')
 							->addGroupClass('sepa_date')
 						!!}
+						{!! Former::checkbox('sepa_enable')
+									->text('Enable/Disable SEPA export for client')
+									->label('SEPA Enable')
+									->value(1) !!}
 						{!! Former::checkbox('is_cdr_attach_invoice')
 						        ->text(trans('texts.cdr_is_attached_to_invoice'))
 								->label('CDR to Invoice')

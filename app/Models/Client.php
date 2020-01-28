@@ -72,6 +72,7 @@ class Client extends EntityModel
         'bic',
         'sepa',
         'sepa_date',
+        'sepa_enable',
         'is_cdr_attach_invoice'
     ];
 
