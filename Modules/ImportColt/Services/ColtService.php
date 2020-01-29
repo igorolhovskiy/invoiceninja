@@ -205,12 +205,8 @@ class ColtService
         $invoice->custom_text_value2 = Utils::processVariables($coltInvoice->custom_text_value2, $client);
         $invoice->is_amount_discount = $coltInvoice->is_amount_discount;
 
-        if (!empty($coltInvoice->due_date)) {
-            $invoice->due_date = Utils::toSqlDate(
-                Carbon::parse($importColt->invoice_date)
-                ->addDay(Carbon::parse($coltInvoice->due_date)->day)
-            );
-        }
+        $coltInvoice->due_date = $this->getDueDate($coltInvoice);
+
         $invoice->invoice_category_id = INVOICE_ITEM_CATEGORY_ORDINARY;
         $invoice->invoice_items = collect([]);
         $sumCost = $sumCdr->sum_cost;
@@ -250,6 +246,21 @@ class ColtService
             ->update(['invoice_id' => $invoice->id]);
 
         return $invoice;
+    }
+
+    private function getDueDate($invoice) {
+        $now = time();
+        if ($invoice->client->payment_terms != 0) {
+            // No custom due date set for this invoice; use the client's payment terms
+            $days = $invoice->client->defaultDaysDue();
+
+            return date('Y-m-d', strtotime('+'.$days.' day', $now));
+        } elseif ($invoice->account->payment_terms != 0) {
+            $days = $invoice->account->defaultDaysDue();
+
+            return date('Y-m-d', strtotime('+'.$days.' day', $now));
+        }
+        return null;      
     }
 
     private function normalizeNumber($number, $patterns) {
