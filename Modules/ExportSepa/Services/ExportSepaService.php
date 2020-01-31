@@ -19,7 +19,7 @@ class ExportSepaService
       'messageIdentification' => 'SEPA-' . $createDate->format('YmdHis') . '-' . Carbon::now()->format('u'),
       'creationDateTime' => $createDate->toIso8601ZuluString(),
       'numberOfTransaction' => $numberOfTransaction,
-      'controlSum' => number_format($controlSum, 2),
+      'controlSum' => number_format($controlSum, 2, '.', ''),
       'nameOfInitiatingParty' => $account->sepa_initiating_party_name,
     ];
     $paymentInformation = [
@@ -27,7 +27,7 @@ class ExportSepaService
       'paymentMethod' => $account->sepa_payment_method,
       'batchBooking' => 'false',
       'numberOfTransaction' => $numberOfTransaction,
-      'controlSum' => number_format($controlSum, 2),
+      'controlSum' => number_format($controlSum, 2, '.', ''),
       'paymentTypeInformation' => [
         'serviceLevelCode' => 'SEPA',
         'localInstrumentCode' => 'CORE',
@@ -42,7 +42,7 @@ class ExportSepaService
       'debitTransactionInfo' => $exportSepa->items->map(function($item) use($account) {
         return [
           'endtoendid' => $item->endtoendid,
-          'amount' => number_format($item->invoice->amount, 2),
+          'amount' => number_format($item->invoice->amount, 2, '.', ''),
           'invoiceNumber' => $item->invoice->invoice_number,
           'invoiceDate' => Carbon::parse($item->invoice->invoice_date)->toDateString(),
           'sepa' => $item->invoice->client->sepa,
