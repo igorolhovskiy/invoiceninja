@@ -24,7 +24,7 @@ class ColtService
     private $srcPatterns;
     private $dstPatterns;
 
-    public function __construct(ClientRepository $clientRepository, 
+    public function __construct(ClientRepository $clientRepository,
         CdrRepository $cdrRepository,
         ImportColtRepository $importcoltRepo,
         RateMachineService $rateMachineService,
@@ -244,6 +244,8 @@ class ColtService
             ->where('done', 1)
             ->whereNull('invoice_id')
             ->update(['invoice_id' => $invoice->id]);
+
+        $cdrRepository->attachCdrToInvoice($invoice);
 
         return $invoice;
     }

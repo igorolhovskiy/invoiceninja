@@ -5,6 +5,7 @@ namespace App\Ninja\Repositories;
 use App\Models\Cdr;
 use App\Models\ClientColtDid;
 use App\Models\Clients;
+use App\Models\Document;
 
 use DB;
 use Utils;
@@ -86,4 +87,59 @@ class CdrRepository extends BaseRepository
         ->where('status', 'RATE_NOT_FOUND')
         ->get();
     }
+
+    public function attachCdrToInvoice($invoice) {
+        if (!$invoice->client->is_cdr_attach_invoice) {
+            return false;
+        }
+
+        $cdrTable = [
+            ['DID', 'Datetime', 'Destination', 'Duration', 'Cost']
+        ];
+        $cdrs = $cdrs = \App\Models\Cdr::select('did', 'datetime', 'dst', 'dur', 'cost')
+            ->where('invoice_id', $invoice->id)
+            ->orderBy('datetime')
+            ->get();
+        if ($cdr->count() === 0) {
+            return null;
+        }
+
+        foreach ($cdrs as $cdr) {
+            $cdrTable[] = [$cdr->did, $cdr->datetime, $cdr->dst, $cdr->dur, $cdr->cost];
+        }
+
+        $document = Document::createNew();
+        $disk = $document->getDisk();
+        $putStream = tmpfile();
+        foreach ($cdrTable as $fields) {
+            fputcsv($putStream, $fields);
+        }
+
+        $fstatStream = fstat($putStream);
+        $streamMetaData = stream_get_meta_data($putStream);
+
+        rewind($putStream);
+
+        $documentType = 'csv';
+        $documentTypeData = Document::$types[$documentType];
+        $name = "CDR for invoice {$invoice->invoice_number}.{$documentType}";
+        $hash = sha1_file($streamMetaData['uri']);
+        $filename = \Auth::user()->account->account_key.'/'.$hash.'.csv';
+        
+        $disk->getDriver()->putStream($filename, $putStream, ['mimetype' => $documentTypeData['mime']]);
+        if (is_resource($putStream)) {
+            fclose($putStream);
+        }
+
+        $size = $fstatStream['size'];
+        $document->invoice_id = $invoice->id;
+        $document->path = $filename;
+        $document->type = $documentType;
+        $document->size = $size;
+        $document->hash = $hash;
+        $document->name = substr($name, -255);       
+        $document->save();
+
+        return $document;
+    }    
 }
