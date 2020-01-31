@@ -100,6 +100,7 @@ class RateMachineService
             ->whereRaw("instr('{$cdr->dst}', code) = 1")
             ->orderByRaw('length(code) desc')
             ->first();
+
         if (!$rate) {
             echo 'Rate not found' . PHP_EOL;
             $cdr->cost = 0;
@@ -109,6 +110,8 @@ class RateMachineService
             return $cdr;
         }
         echo "Found rate: code:{$rate->code}, second:{$rate->init_seconds}, increment: {$rate->increment_seconds}, rate:{$rate->rate}" . PHP_EOL;
+
+        $cdr->destination_name = $rate->description;
 
         if ($rate->init_seconds <= 0) {
             $rate->init_seconds = $this->defaultInitIncrementSeconds;

@@ -19,7 +19,9 @@ class Cdr extends EntityModel
         "dur",
         "cost",
         "done",
-        "status"];
+        "status",
+        "destination_name",
+    ];
 
     /**
      * @var string
