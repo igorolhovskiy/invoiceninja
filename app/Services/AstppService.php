@@ -109,6 +109,7 @@ class AstppService
       ->where('done', 1)
       ->whereNull('invoice_id')
       ->first();
+
     $totalSum = $recurInvoice->invoice_items->sum(function($item) {
       return $item->product_type !== 'telcorates'
         ? round($item->cost * $item->qty, 2) : 0;
@@ -117,10 +118,11 @@ class AstppService
       return $item->product_type === 'telcorates';
     });
     if ($telcoratesItem) {
-      $totalSum += $sumCdr->sum_cost;
-      $telcoratesItem->cost = $sumCdr->sum_cost;
+      $totalSum += $sumCdr->sum_cost ?? 0;
+      $telcoratesItem->cost = $sumCdr->sum_cost ?? 0;
       $telcoratesItem->qty = 1;
     }
+
     // If we don't exceed the limit we don't create invoice
     if ($client->invoice_sum_limit >= $totalSum) {
       echo "Total sum less sum limit, invoice don't bill", PHP_EOL;
@@ -162,7 +164,7 @@ class AstppService
     }
 
     if (! $recurInvoice->shouldSendToday()) {
-        // return false;
+        return false;
     }
     $invoice = Invoice::createNew($recurInvoice);
     $invoice->is_public = true;
@@ -234,7 +236,7 @@ class AstppService
         }
     }
 
-    $cdrRepo->attachCdrToInvoice($invoice);
+    $this->cdrRepo->attachCdrToInvoice($invoice);
 
     $this->dispatchEvents($invoice);
 

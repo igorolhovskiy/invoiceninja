@@ -245,7 +245,7 @@ class ColtService
             ->whereNull('invoice_id')
             ->update(['invoice_id' => $invoice->id]);
 
-        $cdrRepository->attachCdrToInvoice($invoice);
+        $this->cdrRepository->attachCdrToInvoice($invoice);
 
         return $invoice;
     }
