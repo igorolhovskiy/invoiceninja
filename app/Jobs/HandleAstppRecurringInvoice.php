@@ -37,7 +37,7 @@ class HandleAstppRecurringInvoice implements ShouldQueue
      * @return void
      */
     public function handle(AstppService $astppService, LogService $logService)
-    {
+    { 
         echo date('r'), ' Processing ASTPP Recuring invoice: ', $this->recurInvoice->id, PHP_EOL;
         Utils::logAstppService('info', '====================================');
         Utils::logAstppService('info', 'Processing ASTPP Recuring invoice: '. $this->recurInvoice->id);
@@ -80,7 +80,7 @@ class HandleAstppRecurringInvoice implements ShouldQueue
             echo 'Line: ' . $e->getLine() . PHP_EOL;
             echo 'Trace: ' . $e->getTraceAsString() . PHP_EOL;            
             Utils::logError($e);
-            Utils::logAstppService('info', 'Error invoice process: ', $e->getMessage());
+            Utils::logAstppService('info', 'Error invoice process: ' . $e->getMessage());
         }
         Auth::logout();
     }
