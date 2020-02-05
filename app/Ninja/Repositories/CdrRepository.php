@@ -96,11 +96,11 @@ class CdrRepository extends BaseRepository
         $cdrTable = [
             ['DID', 'Datetime', 'Destination', 'Duration', 'Cost']
         ];
-        $cdrs = $cdrs = \App\Models\Cdr::select('did', 'datetime', 'dst', 'dur', 'cost')
+        $cdrs = \App\Models\Cdr::select('did', 'datetime', 'dst', 'dur', 'cost')
             ->where('invoice_id', $invoice->id)
             ->orderBy('datetime')
             ->get();
-        if ($cdr->count() === 0) {
+        if ($cdrs->count() === 0) {
             return null;
         }
 
