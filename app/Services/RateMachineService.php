@@ -45,7 +45,7 @@ class RateMachineService
         return round(ceil($value * $mult) / $mult, $places);
       }
     
-    public function __construct($precision = 4, $defaultInitIncrementSeconds = 1) {
+    public function __construct($precision = 2, $defaultInitIncrementSeconds = 1) {
         // Yes, I know it's like this by default, but I want it to be explicit.
         $this->resetMachine($precision, $defaultInitIncrementSeconds);
     }
