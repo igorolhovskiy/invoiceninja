@@ -199,7 +199,7 @@ class RateMachineService
     /** 
      * Reset all counters
      */
-    public function resetMachine($precision = 4, $defaultInitIncrementSeconds = 1) {
+    public function resetMachine($precision = 2, $defaultInitIncrementSeconds = 1) {
         $this->client = NULL;
         $this->coltInvoice = NULL;
         $this->packages = NULL;
