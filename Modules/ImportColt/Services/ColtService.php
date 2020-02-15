@@ -205,7 +205,7 @@ class ColtService
         $invoice->custom_text_value2 = Utils::processVariables($coltInvoice->custom_text_value2, $client);
         $invoice->is_amount_discount = $coltInvoice->is_amount_discount;
 
-        $coltInvoice->due_date = $this->getDueDate($coltInvoice);
+        $invoice->due_date = $this->getDueDate($invoice);
 
         $invoice->invoice_category_id = INVOICE_ITEM_CATEGORY_ORDINARY;
         $invoice->invoice_items = collect([]);
@@ -251,16 +251,16 @@ class ColtService
     }
 
     private function getDueDate($invoice) {
-        $now = time();
+        $invoiceDate = strtotime($invoice->invoice_date);
         if ($invoice->client->payment_terms != 0) {
             // No custom due date set for this invoice; use the client's payment terms
             $days = $invoice->client->defaultDaysDue();
 
-            return date('Y-m-d', strtotime('+'.$days.' day', $now));
+            return date('Y-m-d', strtotime('+'.$days.' day', $invoiceDate));
         } elseif ($invoice->account->payment_terms != 0) {
             $days = $invoice->account->defaultDaysDue();
 
-            return date('Y-m-d', strtotime('+'.$days.' day', $now));
+            return date('Y-m-d', strtotime('+'.$days.' day', $invoiceDate));
         }
         return null;      
     }
