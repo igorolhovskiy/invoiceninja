@@ -16,6 +16,7 @@ use App\Ninja\Repositories\DocumentRepository;
 use App\Ninja\Repositories\InvoiceRepository;
 use App\Ninja\Repositories\PaymentRepository;
 use App\Ninja\Repositories\TaskRepository;
+use App\Ninja\Repositories\CdrRepository;
 use App\Services\PaymentService;
 use App\Jobs\Client\GenerateStatementData;
 use Auth;
@@ -32,6 +33,7 @@ use URL;
 use Utils;
 use Validator;
 use View;
+use Carbon;
 
 class ClientPortalController extends BaseController
 {
@@ -46,7 +48,8 @@ class ClientPortalController extends BaseController
         DocumentRepository $documentRepo,
         PaymentService $paymentService,
         CreditRepository $creditRepo,
-        TaskRepository $taskRepo)
+        TaskRepository $taskRepo,
+        CdrRepository $cdrRepo)
     {
         $this->invoiceRepo = $invoiceRepo;
         $this->paymentRepo = $paymentRepo;
@@ -55,6 +58,7 @@ class ClientPortalController extends BaseController
         $this->paymentService = $paymentService;
         $this->creditRepo = $creditRepo;
         $this->taskRepo = $taskRepo;
+        $this->cdrRepo = $cdrRepo;
     }
 
     public function viewInvoice($invitationKey)
@@ -210,6 +214,71 @@ class ClientPortalController extends BaseController
         }
 
         return View::make(request()->borderless ? 'invoices.view_borderless' : 'invoices.view', $data);
+    }
+
+    public function viewInvoiceCdrDestinationReport($invitationKey)
+    {
+        if (! $invitation = $this->invoiceRepo->findInvoiceByInvitation($invitationKey)) {
+            return $this->returnError();
+        }
+
+        $invoice = $invitation->invoice;
+        $client = $invoice->client;
+        $account = $invoice->account;
+
+        if (request()->silent) {
+            session(['silent:' . $client->id => true]);
+            return redirect(request()->url() . (request()->borderless ? '?borderless=true' : ''));
+        }
+
+        if (! $account->checkSubdomain(Request::server('HTTP_HOST'))) {
+            return response()->view('error', [
+                'error' => trans('texts.invoice_not_found'),
+            ]);
+        }
+
+        Session::put($invitation->invitation_key, true); // track this invitation has been seen
+        Session::put('contact_key', $invitation->contact->contact_key); // track current contact
+
+        $invoice->features = [
+            'customize_invoice_design' => $account->hasFeature(FEATURE_CUSTOMIZE_INVOICE_DESIGN),
+            'remove_created_by' => $account->hasFeature(FEATURE_REMOVE_CREATED_BY),
+            'invoice_settings' => $account->hasFeature(FEATURE_INVOICE_SETTINGS),
+        ];
+        $invoice->invoice_fonts = $account->getFontsData();
+
+        if ($design = $account->getCustomDesign($invoice->invoice_design_id)) {
+            $invoice->invoice_design->javascript = $design;
+        } else {
+            $invoice->invoice_design->javascript = $invoice->invoice_design->pdfmake;
+        }
+
+        $report = $this->cdrRepo->invoiceDestinationReport($invoice);
+        if ( $report->count() === 0 ) {
+            return response()->view('error', [
+                'error' => 'Cdrs records not found',
+            ]);
+        }
+        $totalDuration = 0;
+        $totalCost = 0;
+        $totalCount = 0;
+        foreach($report as $item) {
+            $totalDuration += $item->duration;
+            $totalCost += $item->cost;
+            $totalCount += $item->cnt;
+            $item->formattedDuration = Utils::secondsToHuman($item->duration);
+        }
+        $data = [
+            'account' => $account,
+            'invoice' => $invoice->hidePrivateFields(),
+            'report' => $report,
+            'totalDuration' => Utils::secondsToHuman($totalDuration),
+            'totalCost' => $totalCost,
+            'totalCount' => $totalCount,
+            'period' => $this->cdrRepo->getCdrPeriodForInvoice($invoice),
+        ];
+
+        return View::make('invoices.cdr-destination-report', $data);
     }
 
     private function getPaymentTypes($account, $client, $invitation)

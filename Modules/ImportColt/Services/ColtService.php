@@ -247,6 +247,8 @@ class ColtService
 
         $this->cdrRepository->attachCdrToInvoice($invoice);
 
+        $this->cdrRepository->attachDestinationReportToInvoice($invoice);
+        
         return $invoice;
     }
 

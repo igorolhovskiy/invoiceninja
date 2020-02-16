@@ -5,7 +5,7 @@
 
 		@include('money_script')
 
-		@foreach ($invoice->client->account->getFontFolders() as $font)
+			@foreach ($invoice->client->account->getFontFolders() as $font)
         	<script src="{{ asset('js/vfs_fonts/'.$font.'.js') }}" type="text/javascript"></script>
     	@endforeach
 
@@ -259,7 +259,7 @@
 			}
 
 			$(function() {
-                @if (Input::has('phantomjs'))
+				@if (Input::has('phantomjs'))
 					@if (Input::has('phantomjs_balances'))
 						document.write(calculateAmounts(invoice).total_amount);
 						document.close();

@@ -2,12 +2,14 @@
 
 namespace App\Ninja\Repositories;
 
+use App\Libraries\CurlUtils;
 use App\Models\Cdr;
 use App\Models\ClientColtDid;
 use App\Models\Clients;
 use App\Models\Document;
 
 use DB;
+use Carbon;
 use Utils;
 
 class CdrRepository extends BaseRepository
@@ -88,6 +90,35 @@ class CdrRepository extends BaseRepository
         ->get();
     }
 
+    public function invoiceDestinationReport($invoice) {
+        return Cdr
+            ::selectRaw('destination_name, count(*) as cnt, sum(dur) as duration, sum(cost) as cost') 
+            ->where('invoice_id', $invoice->id)
+            ->groupBy('destination_name')
+            ->orderBy('destination_name')
+            ->get();
+    }
+
+    public function getCdrPeriodForInvoice($invoice) {
+        $sumCdr = Cdr
+            ::selectRaw('min(datetime) as date_from, max(datetime) as date_to')
+            ->where('invoice_id', $invoice->id)
+            ->first();
+        if (!$sumCdr) {
+            return null;
+        }
+        $period_from = Carbon::parse($sumCdr->date_from)
+            ->startOfMonth()
+            ->toDateString();
+        $period_to = Carbon::parse($sumCdr->date_to)
+            ->endOfMonth()
+            ->toDateString();
+        return [
+            'period_from' => $period_from,
+            'period_to' => $period_to
+        ];
+    }
+
     public function attachCdrToInvoice($invoice) {
         if (!$invoice->client->is_cdr_attach_invoice) {
             return false;
@@ -141,5 +172,113 @@ class CdrRepository extends BaseRepository
         $document->save();
 
         return $document;
+    }
+
+    public function attachDestinationReportToInvoice($invoice)
+    {
+        $cdrCount = \App\Models\Cdr::where('invoice_id', $invoice->id)
+            ->count();
+        if ($cdrCount === 0) {
+            return null;
+        }
+
+        $pdfString = $this->getPDFStringDestinationReport($invoice);
+        if (!$pdfString) {
+            return null;
+        }
+        $document = Document::createNew();
+        $disk = $document->getDisk();
+        $putStream = tmpfile();
+        fwrite($putStream, $pdfString);
+
+        $fstatStream = fstat($putStream);
+        $streamMetaData = stream_get_meta_data($putStream);
+
+        rewind($putStream);
+
+        $documentType = 'pdf';
+        $documentTypeData = Document::$types[$documentType];
+        $name = "CDR destination report {$invoice->invoice_number}.{$documentType}";
+        $hash = sha1_file($streamMetaData['uri']);
+        $filename = \Auth::user()->account->account_key.'/'.$hash.'.pdf';
+        
+        $disk->getDriver()->putStream($filename, $putStream, ['mimetype' => $documentTypeData['mime']]);
+        if (is_resource($putStream)) {
+            fclose($putStream);
+        }
+
+        $size = $fstatStream['size'];
+        $document->invoice_id = $invoice->id;
+        $document->path = $filename;
+        $document->type = $documentType;
+        $document->size = $size;
+        $document->hash = $hash;
+        $document->name = substr($name, -255);       
+        $document->save();
+
+        return $document;        
+    }
+
+    /**
+     * @return bool|string
+     */
+    public function getPDFStringDestinationReport($invoice, $decode = true)
+    {
+        if (! env('PHANTOMJS_CLOUD_KEY') && ! env('PHANTOMJS_BIN_PATH')) {
+            return false;
+        }
+
+        if (Utils::isTravis()) {
+            return false;
+        }
+
+        $invitation = $invoice->invitations[0];
+        $link = $invitation->getLink('view', true, true) . "/cdr-destination-report";
+        $pdfString = false;
+        $phantomjsSecret = env('PHANTOMJS_SECRET');
+        $phantomjsLink = $link . "?phantomjs=true&phantomjs_secret={$phantomjsSecret}";
+        try {
+            if (env('PHANTOMJS_BIN_PATH')) {
+                // we see occasional 408 errors
+                for ($i=1; $i<=5; $i++) {
+                    $pdfString = CurlUtils::phantom('GET', $phantomjsLink);
+                    $pdfString = strip_tags($pdfString);                   
+                    if (strpos($pdfString, 'data') === 0) {
+                        break;
+                    } else {
+                        if (Utils::isNinjaDev() || Utils::isTravis()) {
+                            Utils::logError('Failed to generate: ' . $i);
+                        }
+                        $pdfString = false;
+                        sleep(2);
+                    }
+                }
+            }
+
+            if (! $pdfString && ($key = env('PHANTOMJS_CLOUD_KEY'))) {
+                $url = "http://api.phantomjscloud.com/api/browser/v2/{$key}/?request=%7Burl:%22{$link}?phantomjs=true%26phantomjs_secret={$phantomjsSecret}%22,renderType:%22html%22%7D";
+                $pdfString = CurlUtils::get($url);
+                $pdfString = strip_tags($pdfString);
+            }
+        } catch (\Exception $exception) {
+            Utils::logError("PhantomJS - Failed to load {$phantomjsLink}: {$exception->getMessage()}");
+            return false;
+        }
+
+        if (! $pdfString || strlen($pdfString) < 200) {
+            Utils::logError("PhantomJS - Invalid response {$phantomjsLink}: {$pdfString}");
+            return false;
+        }
+
+        if ($decode) {
+            if ($pdf = Utils::decodePDF($pdfString)) {
+                return $pdf;
+            } else {
+                Utils::logError("PhantomJS - Unable to decode {$phantomjsLink}");
+                return false;
+            }
+        } else {
+            return $pdfString;
+        }
     }    
 }

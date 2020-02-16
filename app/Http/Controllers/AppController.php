@@ -439,7 +439,8 @@ class AppController extends BaseController
 		->whereHas('client', function($query) {
 			$query->where('is_deleted', 0);
 		})
-		->where('invoice_category_id', 1)
+        ->where('invoice_category_id', 1)
+        ->where('id', 1489)
 		->orderBy('id')->first();
 
         if (! $invoice) {

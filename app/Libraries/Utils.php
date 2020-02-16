@@ -1506,4 +1506,18 @@ class Utils
         $stacktrace = sprintf("%s %s %s \n", date('Y-m-d h:i:s'), $level, $message);
         file_put_contents(storage_path('logs/astpp-rate-not-found.log'), $stacktrace, FILE_APPEND);           
     }    
+
+    public static function secondsToHuman($seconds)
+    {
+        $hours = $seconds / 3600;
+        $minutes = $seconds / 60 % 60;
+        $sec = $seconds % 60;
+        if ($hours >= 1) {
+            return sprintf('%dh:%02dm:%02ds', $hours, $minutes, $sec);
+        }
+        if ($minutes >= 1) {
+            return sprintf('%dm:%02ds', $minutes, $sec);
+        }
+        return sprintf('%ds', $sec);
+    }
 }

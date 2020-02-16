@@ -30,6 +30,7 @@ Route::group(['middleware' => ['lookup:contact']], function () {
 // Client visible pages
 Route::group(['middleware' => ['lookup:contact', 'auth:client']], function () {
     Route::get('view/{invitation_key}', 'ClientPortalController@viewInvoice');
+    Route::get('view/{invitation_key}/cdr-destination-report', 'ClientPortalController@viewInvoiceCdrDestinationReport');
     Route::get('proposal/{proposal_invitation_key}/download', 'ClientPortalProposalController@downloadProposal');
     Route::get('proposal/{proposal_invitation_key}', 'ClientPortalProposalController@viewProposal');
     Route::get('download/{invitation_key}', 'ClientPortalController@download');

@@ -49,7 +49,7 @@ class CurlUtils
             return false;
         }
 
-        $client = Client::getInstance();          
+        $client = Client::getInstance();  
         $client->isLazy();
         $client->getEngine()->addOption("--ignore-ssl-errors=true");
         $client->getEngine()->addOption("--ssl-protocol=tlsv1");

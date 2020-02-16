@@ -238,6 +238,8 @@ class AstppService
 
     $this->cdrRepo->attachCdrToInvoice($invoice);
 
+    $this->cdrRepo->attachDestinationReportToInvoice($invoice);
+
     $this->dispatchEvents($invoice);
 
     return $invoice;
