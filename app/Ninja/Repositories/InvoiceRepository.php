@@ -431,7 +431,7 @@ class InvoiceRepository extends BaseRepository
 
         if (isset($data['is_public']) && filter_var($data['is_public'], FILTER_VALIDATE_BOOLEAN)) {
             $invoice->is_public = true;
-            if (! $invoice->isSent()) {
+            if (!$invoice->isSent() && $invoice->invoice_status_id !== INVOICE_STATUS_DRAFT) {
                 $invoice->invoice_status_id = INVOICE_STATUS_SENT;
             }
         }
@@ -820,7 +820,7 @@ class InvoiceRepository extends BaseRepository
 
         $invoice->load('invoice_items');
 
-        if (Auth::check()) {
+        if (Auth::check() && $invoice->invoice_status_id !== INVOICE_STATUS_DRAFT) {
             $invoice = $this->saveInvitations($invoice);
         }
 
