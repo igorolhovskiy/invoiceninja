@@ -142,8 +142,12 @@ class CdrRepository extends BaseRepository
         ];
         return Response::stream(function () use ($cdrTable) {
                 $file = fopen('php://output', 'w');
-                foreach ($cdrTable as $row) { 
-                    fputcsv($file, $row);
+                foreach ($cdrTable as $row) {
+                    // Change comma or dot to CSV_EXPORT_DECIMAL_DELIMITER in Cost field
+                    $row[4] = str_replace(".", CSV_EXPORT_DECIMAL_DELIMITER, $row[4]);
+                    $row[4] = str_replace(",", CSV_EXPORT_DECIMAL_DELIMITER, $row[4]);
+                    
+                    fputcsv($file, $row, CSV_EXPORT_DELIMITER, CSV_EXPORT_ENCLOSURE);
                 }
                 fclose($file);
             }, 200, $headers);
@@ -173,7 +177,11 @@ class CdrRepository extends BaseRepository
         $disk = $document->getDisk();
         $putStream = tmpfile();
         foreach ($cdrTable as $fields) {
-            fputcsv($putStream, $fields);
+            // Change comma or dot to CSV_EXPORT_DECIMAL_DELIMITER in Cost field
+            $row[4] = str_replace(".", CSV_EXPORT_DECIMAL_DELIMITER, $row[4]);
+            $row[4] = str_replace(",", CSV_EXPORT_DECIMAL_DELIMITER, $row[4]);
+            
+            fputcsv($file, $row, CSV_EXPORT_DELIMITER, CSV_EXPORT_ENCLOSURE);
         }
 
         $fstatStream = fstat($putStream);

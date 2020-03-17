@@ -1047,13 +1047,13 @@ class Utils
     public static function exportData($output, $data, $headers = false)
     {
         if ($headers) {
-            fputcsv($output, $headers);
+            fputcsv($output, $headers, CSV_EXPORT_DELIMITER, CSV_EXPORT_ENCLOSURE);
         } elseif (count($data) > 0) {
-            fputcsv($output, array_keys($data[0]));
+            fputcsv($output, array_keys($data[0]), CSV_EXPORT_DELIMITER, CSV_EXPORT_ENCLOSURE);
         }
 
         foreach ($data as $record) {
-            fputcsv($output, $record);
+            fputcsv($output, $record, CSV_EXPORT_DELIMITER, CSV_EXPORT_ENCLOSURE);
         }
 
         fwrite($output, "\n");
