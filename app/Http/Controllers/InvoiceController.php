@@ -22,6 +22,7 @@ use App\Ninja\Datatables\InvoiceDatatable;
 use App\Ninja\Repositories\ClientRepository;
 use App\Ninja\Repositories\DocumentRepository;
 use App\Ninja\Repositories\InvoiceRepository;
+use App\Ninja\Repositories\CdrRepository;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
 use App\Services\RecurringInvoiceService;
@@ -40,12 +41,13 @@ class InvoiceController extends BaseController
     protected $invoiceRepo;
     protected $clientRepo;
     protected $documentRepo;
+    protected $cdrRepo;
     protected $invoiceService;
     protected $paymentService;
     protected $recurringInvoiceService;
     protected $entityType = ENTITY_INVOICE;
 
-    public function __construct(InvoiceRepository $invoiceRepo, ClientRepository $clientRepo, InvoiceService $invoiceService, DocumentRepository $documentRepo, RecurringInvoiceService $recurringInvoiceService, PaymentService $paymentService)
+    public function __construct(InvoiceRepository $invoiceRepo, ClientRepository $clientRepo, InvoiceService $invoiceService, DocumentRepository $documentRepo, RecurringInvoiceService $recurringInvoiceService, PaymentService $paymentService, CdrRepository $cdrRepo)
     {
         // parent::__construct();
 
@@ -54,6 +56,7 @@ class InvoiceController extends BaseController
         $this->invoiceService = $invoiceService;
         $this->recurringInvoiceService = $recurringInvoiceService;
         $this->paymentService = $paymentService;
+        $this->cdrRepo = $cdrRepo;
     }
 
     public function index()
@@ -666,5 +669,11 @@ class InvoiceController extends BaseController
         $count = $query->count();
 
         return $count ? RESULT_FAILURE : RESULT_SUCCESS;
+    }
+
+    public function cdrExport(InvoiceRequest $request)
+    {
+        $invoice = $request->entity();
+        return $this->cdrRepo->exportCdr($invoice);
     }
 }

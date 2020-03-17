@@ -135,6 +135,25 @@ class InvoiceDatatable extends EntityDatatable
                 '--divider--', function () {
                     return false;
                 },
+                function ($model) use ($entityType) {
+                    return Auth::user()->is_admin && $entityType == ENTITY_INVOICE
+                        && $model->cdrs_count > 0;
+                },
+            ],            
+            [
+                'CDR Export',
+                function ($model) {
+                    return URL::to("invoices/cdr_export/{$model->public_id}");
+                },
+                function ($model) use ($entityType) {
+                    return Auth::user()->is_admin && $entityType == ENTITY_INVOICE
+                        && $model->cdrs_count > 0;
+                },
+            ], 
+            [
+                '--divider--', function () {
+                    return false;
+                },
                 function ($model) {
                     return Auth::user()->canCreateOrEdit(ENTITY_INVOICE);
                 },

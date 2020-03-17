@@ -2,6 +2,7 @@
 
 namespace App\Ninja\Repositories;
 
+use Illuminate\Support\Facades\Response;
 use App\Libraries\CurlUtils;
 use App\Models\Cdr;
 use App\Models\ClientColtDid;
@@ -117,6 +118,35 @@ class CdrRepository extends BaseRepository
             'period_from' => $period_from,
             'period_to' => $period_to
         ];
+    }
+
+    public function exportCdr($invoice) {
+        // TODO: create spearte method to build cdr data
+        $cdrTable = [
+            ['DID', 'Datetime', 'Destination', 'Duration', 'Cost']
+        ];
+        $cdrs = \App\Models\Cdr::select('did', 'datetime', 'dst', 'dur', 'cost')
+            ->where('invoice_id', $invoice->id)
+            ->orderBy('datetime')
+            ->get();
+
+        foreach ($cdrs as $cdr) {
+            $cdrTable[] = [$cdr->did, $cdr->datetime, $cdr->dst, $cdr->dur, $cdr->cost];
+        }
+        $headers = [
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Content-type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=cdrs_' . $invoice->invoice_number . '.csv',
+            'Expires'             => '0',
+            'Pragma'              => 'public'
+        ];
+        return Response::stream(function () use ($cdrTable) {
+                $file = fopen('php://output', 'w');
+                foreach ($cdrTable as $row) { 
+                    fputcsv($file, $row);
+                }
+                fclose($file);
+            }, 200, $headers);
     }
 
     public function attachCdrToInvoice($invoice) {

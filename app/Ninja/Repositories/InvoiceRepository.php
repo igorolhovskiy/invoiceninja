@@ -149,7 +149,10 @@ class InvoiceRepository extends BaseRepository
                       ->orWhere('contacts.email', 'like', '%'.$filter.'%');
             });
         }
-
+        $query->leftJoin(
+            DB::raw("(select invoice_id, count(*) as cdrs_count from cdrs GROUP BY invoice_id) cdrs_count"),
+                'invoices.id', '=', 'cdrs_count.invoice_id')
+            ->addSelect('cdrs_count');
         return $query;
     }
 

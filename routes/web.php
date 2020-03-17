@@ -182,6 +182,8 @@ Route::group(['middleware' => ['lookup:user', 'auth:user']], function () {
     Route::get('invoices/invoice_history/{invoice_id}', 'InvoiceController@invoiceHistory');
     Route::get('quotes/quote_history/{invoice_id}', 'InvoiceController@invoiceHistory');
 
+    Route::get('invoices/cdr_export/{invoice_id}', 'InvoiceController@cdrExport');
+
     Route::resource('invoices', 'InvoiceController');
     Route::get('api/invoices/{client_id?}', 'InvoiceController@getDatatable');
     Route::get('invoices/create/{client_id?}', 'InvoiceController@create');
