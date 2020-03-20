@@ -85,6 +85,10 @@ if (! defined('APP_NAME')) {
     define('CDR_STATUS_PACKAGE_PLUS', 'PACKAGE+');
     define('CDR_STATUS_STANDARD', 'STANDARD');
 
+    define('CSV_EXPORT_DELIMITER', ';');
+    define('CSV_EXPORT_ENCLOSURE', '"');
+    define('CSV_EXPORT_DECIMAL_DELIMITER', ',');
+
     define('PERSON_CONTACT', 'contact');
     define('PERSON_USER', 'user');
     define('PERSON_VENDOR_CONTACT', 'vendorcontact');
