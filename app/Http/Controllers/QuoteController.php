@@ -96,6 +96,10 @@ class QuoteController extends BaseController
     {
         $account = Auth::user()->account;
 
+        $invoiceCategories = [
+            INVOICE_ITEM_CATEGORY_ORDINARY => Invoice::$invoiceCategories[INVOICE_ITEM_CATEGORY_ORDINARY]
+        ];
+
         return [
           'entityType' => ENTITY_QUOTE,
           'account' => Auth::user()->account->load('country'),
@@ -110,6 +114,7 @@ class QuoteController extends BaseController
           'invoiceLabels' => Auth::user()->account->getInvoiceLabels(),
           'isRecurring' => false,
           'expenses' => collect(),
+          'invoiceCategories' => $invoiceCategories          
         ];
     }
 
