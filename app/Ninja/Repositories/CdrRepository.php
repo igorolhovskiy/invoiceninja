@@ -176,12 +176,12 @@ class CdrRepository extends BaseRepository
         $document = Document::createNew();
         $disk = $document->getDisk();
         $putStream = tmpfile();
-        foreach ($cdrTable as $fields) {
+        foreach ($cdrTable as $row) {
             // Change comma or dot to CSV_EXPORT_DECIMAL_DELIMITER in Cost field
             $row[4] = str_replace(".", CSV_EXPORT_DECIMAL_DELIMITER, $row[4]);
             $row[4] = str_replace(",", CSV_EXPORT_DECIMAL_DELIMITER, $row[4]);
             
-            fputcsv($file, $row, CSV_EXPORT_DELIMITER, CSV_EXPORT_ENCLOSURE);
+            fputcsv($putStream, $row, CSV_EXPORT_DELIMITER, CSV_EXPORT_ENCLOSURE);
         }
 
         $fstatStream = fstat($putStream);
