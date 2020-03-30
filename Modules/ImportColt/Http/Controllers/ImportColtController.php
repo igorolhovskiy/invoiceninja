@@ -100,7 +100,6 @@ class ImportColtController extends BaseController
     public function edit(ImportColtRequest $request)
     {
         $importcolt = $request->entity();
-
         $data = [
             'importcolt' => $importcolt,
             'method' => 'PUT',

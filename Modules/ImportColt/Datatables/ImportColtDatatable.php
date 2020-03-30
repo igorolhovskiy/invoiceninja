@@ -6,6 +6,7 @@ use Utils;
 use URL;
 use Auth;
 use App\Ninja\Datatables\EntityDatatable;
+use Modules\ImportColt\Models\ImportColt;
 
 class ImportColtDatatable extends EntityDatatable
 {
@@ -69,6 +70,26 @@ class ImportColtDatatable extends EntityDatatable
                 }
             ],
             [
+                mtrans('importcolt', 'reprocess_file_importcolt'),
+                function ($model) {
+                    $confirmText = 'Reprocess COLT file. It will Regenerate CDR and recreate invoices.';
+                    return "javascript:submitForm_importcolt('reprocessfile', {$model->public_id}, '{$confirmText}')";
+                },
+                function ($model) {
+                    $importColtId = ImportColt::getPrivateId($model->public_id);
+                    if (\App\Models\Invoice::scope()
+                        ->whereHas('cdrs', function($query) use ($importColtId) {
+                            $query->where('import_colt_id', $importColtId);
+                        })
+                        ->where('invoice_status_id', '<>', '1')
+                        ->exists() ) {
+                        return false;
+                    }
+                    
+                    return Auth::user()->can('edit', ['importcolt', $model->user_id]);
+                }
+            ],            
+            [
                 mtrans('importcolt', 'send_invoices_importcolt'),
                 function ($model) {
                     $confirmText = 'Send all invoices to email.';
@@ -77,16 +98,7 @@ class ImportColtDatatable extends EntityDatatable
                 function ($model) {
                     return Auth::user()->can('edit', ['importcolt', $model->user_id]);
                 }
-            ],
-            [
-                mtrans('importcolt', 'sepa_export_importcolt'),
-                function ($model) {
-                    return URL::to("importcolt/{$model->public_id}/edit");
-                },
-                function ($model) {
-                    return Auth::user()->can('edit', ['importcolt', $model->user_id]);
-                }
-            ],                                    
+            ],                                  
         ];
     }
 
