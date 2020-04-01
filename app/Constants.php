@@ -47,6 +47,9 @@ if (! defined('APP_NAME')) {
     define('ENTITY_PROPOSAL_SNIPPET', 'proposal_snippet');
     define('ENTITY_PROPOSAL_CATEGORY', 'proposal_category');
     define('ENTITY_PROPOSAL_INVITATION', 'proposal_invitation');
+    define('ENTITY_IMPORTCOLT', 'importcolt');
+    define('ENTITY_TELCOPACKAGES', 'telcopackages');
+    define('ENTITY_TELCORATES', 'telcorates');
 
     $permissionEntities = [
         ENTITY_CLIENT,
@@ -63,6 +66,9 @@ if (! defined('APP_NAME')) {
         ENTITY_TASK,
         ENTITY_VENDOR,
         ENTITY_RECURRING_INVOICE,
+        ENTITY_IMPORTCOLT,
+        ENTITY_TELCOPACKAGES,
+        ENTITY_TELCORATES,
     ];
 
     define('PERMISSION_ENTITIES', json_encode($permissionEntities));

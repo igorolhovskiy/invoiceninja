@@ -53,10 +53,9 @@ class ImportColtController extends BaseController
     public function datatable(ColtDatatableService $datatableService)
     {
         $search = request()->input('sSearch');
-        $userId = Auth::user()->filterId();
 
         $datatable = new ImportColtDatatable();
-        $query = $this->importcoltRepo->find($search, $userId);
+        $query = $this->importcoltRepo->find($search);
 
         return $datatableService->createDatatable($datatable, $query);
     }

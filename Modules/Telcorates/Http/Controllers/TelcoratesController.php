@@ -41,10 +41,9 @@ class TelcoratesController extends BaseController
     public function datatable(DatatableService $datatableService)
     {
         $search = request()->input('sSearch');
-        $userId = Auth::user()->filterId();
 
         $datatable = new TelcoratesDatatable();
-        $query = $this->telcoratesRepo->find($search, $userId);
+        $query = $this->telcoratesRepo->find($search);
 
         return $datatableService->createDatatable($datatable, $query);
     }

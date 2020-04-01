@@ -22,7 +22,7 @@ class TelcoratesRepository extends BaseRepository
                 ->withTrashed();
     }
 
-    public function find($filter = null, $userId = false)
+    public function find($filter = null)
     {
         $query = DB::table('telcorates')
                     ->where('telcorates.account_id', '=', \Auth::user()->account_id)
@@ -37,10 +37,6 @@ class TelcoratesRepository extends BaseRepository
                     );
 
         $this->applyFilters($query, 'telcorates');
-
-        if ($userId) {
-            $query->where('clients.user_id', '=', $userId);
-        }
 
         if ($filter) {
             $query->where('name', 'like', "%$filter%")

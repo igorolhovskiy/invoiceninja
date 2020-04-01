@@ -50,10 +50,9 @@ class ExportSepaController extends BaseController
     public function datatable(DatatableService $datatableService)
     {
         $search = request()->input('sSearch');
-        $userId = Auth::user()->filterId();
 
         $datatable = new ExportSepaDatatable();
-        $query = $this->exportsepaRepo->find($search, $userId);
+        $query = $this->exportsepaRepo->find($search);
 
         return $datatableService->createDatatable($datatable, $query);
     }

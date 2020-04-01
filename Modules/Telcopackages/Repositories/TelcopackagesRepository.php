@@ -22,7 +22,7 @@ class TelcopackagesRepository extends BaseRepository
                 ->withTrashed();
     }
 
-    public function find($filter = null, $userId = false)
+    public function find($filter = null)
     {
         $query = DB::table('telcopackages')
                     ->where('telcopackages.account_id', '=', \Auth::user()->account_id)
@@ -36,10 +36,6 @@ class TelcopackagesRepository extends BaseRepository
                     );
 
         $this->applyFilters($query, 'telcopackages');
-
-        if ($userId) {
-            $query->where('clients.user_id', '=', $userId);
-        }
 
         if ($filter) {
             $query->where(function ($query) use ($filter) {

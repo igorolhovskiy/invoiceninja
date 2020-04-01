@@ -41,10 +41,9 @@ class TelcopackagesController extends BaseController
     public function datatable(DatatableService $datatableService)
     {
         $search = request()->input('sSearch');
-        $userId = Auth::user()->filterId();
 
         $datatable = new TelcopackagesDatatable();
-        $query = $this->telcopackagesRepo->find($search, $userId);
+        $query = $this->telcopackagesRepo->find($search);
 
         return $datatableService->createDatatable($datatable, $query);
     }

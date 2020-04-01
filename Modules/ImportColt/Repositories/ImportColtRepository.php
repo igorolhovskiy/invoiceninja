@@ -26,7 +26,7 @@ class ImportcoltRepository extends BaseRepository
                 ->withTrashed();
     }
 
-    public function find($filter = null, $userId = false)
+    public function find($filter = null)
     {
         $query = DB::table('import_colts')
                     ->where('import_colts.account_id', '=', \Auth::user()->account_id)
@@ -43,10 +43,6 @@ class ImportcoltRepository extends BaseRepository
                     );
 
         $this->applyFilters($query, 'import_colt');
-
-        if ($userId) {
-            $query->where('clients.user_id', '=', $userId);
-        }
 
         /*
         if ($filter) {

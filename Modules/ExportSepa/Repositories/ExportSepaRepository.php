@@ -28,7 +28,7 @@ class ExportsepaRepository extends BaseRepository
                 ->withTrashed();
     }
 
-    public function find($filter = null, $userId = false)
+    public function find($filter = null)
     {
         $query = ExportSepa::where('exportsepa.account_id', '=', \Auth::user()->account_id)
                     ->select(
@@ -46,10 +46,6 @@ class ExportsepaRepository extends BaseRepository
                     ->withCount('items');
 
         $this->applyFilters($query, 'exportsepa');
-
-        if ($userId) {
-            $query->where('clients.user_id', '=', $userId);
-        }
 
         /*
         if ($filter) {
