@@ -3173,6 +3173,14 @@ $LANG = array(
     'sepa_payment_creditor_id' => 'Payment creditor ID',
     'sepa_end_to_end_current_id' => 'EndToEndCurrentId',
     'sepa_invoice_purpose_prefix' => 'SEPA Invoice purpose prefix',
+    'new_template' => 'New Template',
+    'template_history' => 'Template History',
+    'archive_template' => 'Archive Template',
+    'delete_template' => 'Delete Template',
+    'archived_template' => 'Successfully archived template',
+    'archived_templates' => 'Successfully archived :count templates',
+    'deleted_template' => 'Successfully deleted quote',
+    'deleted_templates' => 'Successfully deleted :count templates',
 );
 
 return $LANG;

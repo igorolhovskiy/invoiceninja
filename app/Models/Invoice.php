@@ -75,7 +75,7 @@ class Invoice extends EntityModel implements BalanceAffecting
         STATUS_DELETED,
         INVOICE_STATUS_IMPORT_COLT,
         INVOICE_TYPE_ORDINARY,
-        INVOICE_TYPE_COLT,
+        // INVOICE_TYPE_COLT,
     ];
     
     // used for custom invoice numbers
@@ -875,6 +875,9 @@ class Invoice extends EntityModel implements BalanceAffecting
      */
     public function getEntityType()
     {
+        if ($this->invoice_category_id === INVOICE_ITEM_CATEGORY_COLT) {
+            return ENTITY_TEMPLATE;
+        }
         return $this->isType(INVOICE_TYPE_QUOTE) ? ENTITY_QUOTE : ENTITY_INVOICE;
     }
 
@@ -1572,6 +1575,16 @@ class Invoice extends EntityModel implements BalanceAffecting
                 }
             } elseif ($entityType == ENTITY_INVOICE) {
                 if (in_array($status->id, [INVOICE_STATUS_APPROVED])) {
+                    continue;
+                }
+            } elseif ($entityType == ENTITY_TEMPLATE) {
+                if (in_array($status->id, [
+                    INVOICE_STATUS_APPROVED, 
+                    INVOICE_STATUS_PAID,
+                    INVOICE_STATUS_PARTIAL,
+                    INVOICE_STATUS_VIEWED,
+                    INVOICE_STATUS_SENT
+                    ])) {
                     continue;
                 }
             }

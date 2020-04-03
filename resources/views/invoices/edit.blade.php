@@ -70,7 +70,7 @@
 		@if ($invoice->is_recurring)
 			<li>{!! link_to('recurring_invoices', trans('texts.recurring_invoices')) !!}</li>
 		@else
-			<li>{!! link_to(($entityType == ENTITY_QUOTE ? 'quotes' : 'invoices'), trans('texts.' . ($entityType == ENTITY_QUOTE ? 'quotes' : 'invoices'))) !!}</li>
+			<li>{!! link_to(($entityType == ENTITY_QUOTE ? 'quotes' : ($entityType == ENTITY_TEMPLATE ? 'templates' : 'invoices')), trans('texts.' . ($entityType == ENTITY_QUOTE ? 'quotes' : ($entityType == ENTITY_TEMPLATE ? 'templates' : 'invoices')))) !!}</li>
 			<li class="active">{{ $invoice->invoice_number }}</li>
 		@endif
 		@if ($invoice->is_recurring && $invoice->isSent())

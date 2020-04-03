@@ -334,8 +334,6 @@ class InvoiceController extends BaseController
         ];
         if ($invoice->is_recurring) {
             $invoiceCategories[INVOICE_ITEM_CATEGORY_ASTPP] = Invoice::$invoiceCategories[INVOICE_ITEM_CATEGORY_ASTPP];
-        } else  {
-            $invoiceCategories[INVOICE_ITEM_CATEGORY_COLT] = Invoice::$invoiceCategories[INVOICE_ITEM_CATEGORY_COLT];
         }
         return [
             'data' => Input::old('data'),

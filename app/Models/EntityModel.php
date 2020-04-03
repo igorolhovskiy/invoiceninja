@@ -238,7 +238,8 @@ class EntityModel extends Eloquent
             }
         }
 
-        if ($entityType == ENTITY_QUOTE || $entityType == ENTITY_RECURRING_INVOICE) {
+        if ($entityType == ENTITY_QUOTE || $entityType == ENTITY_RECURRING_INVOICE
+            || $entityType == ENTITY_TEMPLATE) {
             $entityType = ENTITY_INVOICE;
         }
 
@@ -347,7 +348,8 @@ class EntityModel extends Eloquent
             'reports' => 'th-list',
             'projects' => 'briefcase',
             'telcopackages' => 'cubes',
-            'telcorates' => 'star-o'
+            'telcorates' => 'star-o',
+            'templates' => 'file-text'
         ];
 
         return array_get($icons, $entityType);

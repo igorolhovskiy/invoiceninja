@@ -413,6 +413,7 @@
                 'invoices',
                 'payments',
                 'recurring_invoices',
+                'templates',
                 'credits',
                 'quotes',
                 'proposals',

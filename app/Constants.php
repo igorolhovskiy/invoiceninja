@@ -50,6 +50,7 @@ if (! defined('APP_NAME')) {
     define('ENTITY_IMPORTCOLT', 'importcolt');
     define('ENTITY_TELCOPACKAGES', 'telcopackages');
     define('ENTITY_TELCORATES', 'telcorates');
+    define('ENTITY_TEMPLATE', 'template');
 
     $permissionEntities = [
         ENTITY_CLIENT,

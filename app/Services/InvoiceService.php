@@ -163,6 +163,12 @@ class InvoiceService extends BaseService
             $query->where('invoices.user_id', '=', Auth::user()->id);
         }
 
+        if ($entityType === ENTITY_TEMPLATE) {
+            $query->where('invoices.invoice_category_id', '=', INVOICE_ITEM_CATEGORY_COLT);
+        } else {
+            $query->where('invoices.invoice_category_id', '<>', INVOICE_ITEM_CATEGORY_COLT);
+        }
+
         return $this->datatableService->createDatatable($datatable, $query);
     }
 }

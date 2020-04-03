@@ -163,8 +163,9 @@ class InvoiceDatatable extends EntityDatatable
                 function ($model) use ($entityType) {
                     return "javascript:submitForm_{$entityType}('markSent', {$model->public_id})";
                 },
-                function ($model) {
-                    return ! $model->is_public && Auth::user()->can('edit', [ENTITY_INVOICE, $model]);
+                function ($model) use ($entityType) {
+                    return ! $model->is_public && Auth::user()->can('edit', [ENTITY_INVOICE, $model])
+                        && $entityType !== ENTITY_TEMPLATE;
                 },
             ],
             [

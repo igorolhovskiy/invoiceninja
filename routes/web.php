@@ -181,6 +181,7 @@ Route::group(['middleware' => ['lookup:user', 'auth:user']], function () {
     Route::get('invoices/delivery_note/{invoice_id}', 'InvoiceController@deliveryNote');
     Route::get('invoices/invoice_history/{invoice_id}', 'InvoiceController@invoiceHistory');
     Route::get('quotes/quote_history/{invoice_id}', 'InvoiceController@invoiceHistory');
+    Route::get('templates/template_history/{invoice_id}', 'InvoiceController@invoiceHistory');
 
     Route::get('invoices/cdr_export/{invoice_id}', 'InvoiceController@cdrExport');
 
@@ -219,6 +220,15 @@ Route::group(['middleware' => ['lookup:user', 'auth:user']], function () {
     Route::get('quotes', 'QuoteController@index');
     Route::get('api/quotes/{client_id?}', 'QuoteController@getDatatable');
     Route::post('quotes/bulk', 'QuoteController@bulk');
+
+    Route::get('templates', 'TemplateController@index');
+    Route::get('templates/create/{client_id?}', 'TemplateController@create');
+    Route::get('api/templates/{client_id?}', 'TemplateController@getDatatable');
+    Route::post('templates/bulk', 'TemplateController@bulk');
+    Route::get('templates/{invoices}/edit', 'InvoiceController@edit');
+    Route::put('templates/{invoices}', 'InvoiceController@update');
+    Route::get('templates/{invoices}', 'InvoiceController@edit');
+    Route::post('templates', 'InvoiceController@store');      
 
     Route::post('proposals/categories/bulk', 'ProposalCategoryController@bulk');
     Route::get('proposals/categories/{proposal_categories}/edit', 'ProposalCategoryController@edit');
