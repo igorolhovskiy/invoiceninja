@@ -139,7 +139,7 @@ class ColtService
             if ($invoice) {
                 $stat['count'] += 1;
                 $stat['sum'] += $invoice->amount;
-                Utils::logColtService('info', "Created Invoice for client {$client->name}({$client->number}/{$client->id}) on sum {$invoice->amount}.");
+                Utils::logColtService('info', "Created Invoice for client |{$client->name}|{$client->id}|{$invoice->amount}|");
             }
         }
         return $stat;
