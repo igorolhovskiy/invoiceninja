@@ -93,7 +93,7 @@ class CdrRepository extends BaseRepository
 
     public function invoiceDestinationReport($invoice) {
         return Cdr
-            ::selectRaw('destination_name, count(*) as cnt, sum(dur) as duration, sum(cost) as cost') 
+            ::selectRaw("IFNULL(destination_name,'') as destination_name, count(*) as cnt, sum(dur) as duration, sum(cost) as cost") 
             ->where('invoice_id', $invoice->id)
             ->groupBy('destination_name')
             ->orderBy('destination_name')
