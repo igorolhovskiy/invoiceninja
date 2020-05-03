@@ -47,14 +47,16 @@
                             <tbody data-bind="foreach: invoicesData">
                                 <tr role="row"
                                     data-bind="visible: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize(),
-                                        css: {'alert alert-danger': !is_filled_sepa_data}">
+                                        css: {'alert alert-danger': !is_filled_sepa_data}
+                                        ">
                                     @if ($method === 'POST')
                                     <td>
                                         <label data-bind="if: is_filled_sepa_data">
                                             <input type="checkbox" data-bind="checked: isChecked">
                                         </label>
-                                        <span data-bind="if: !is_filled_sepa_data"
-                                            data-toggle="tooltip" title="Please, fill SEPA data for client!"
+                                        <span data-bind="if: !is_filled_sepa_data,
+                                            attr: {title: `Please fill SEPA fields: ${emptySepaFields}`}"
+                                            data-toggle="tooltip"
                                         >
                                             <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
                                         </span>
@@ -80,6 +82,7 @@
                             currentPage: page, totalCount: total, pageSize: pageSize, maxPages: maxPages, 
                             directions: directions, boundary: boundary, text: text }"></div>
                     </div>
+                    <div id="tooltipContainer"></div>
                 </div>
             </div>
         </div>
@@ -137,8 +140,16 @@
             this.isCheckedAll = ko.observable(1);
             if (invoices && invoices.length) {
                 invoices.forEach((invoice) => {
+                    const sepaData = JSON.parse(invoice.sepa_data);
+                    const emptySepaFields = [];
+                    for (const field in sepaData) {
+                        if (!sepaData[field]) {
+                            emptySepaFields.push(field);
+                        }
+                    }
                     this.invoicesData.push({
                         isChecked: ko.observable(invoice.is_filled_sepa_data),
+                        emptySepaFields: emptySepaFields.join(', '),
                         ...invoice
                     });
                 });
