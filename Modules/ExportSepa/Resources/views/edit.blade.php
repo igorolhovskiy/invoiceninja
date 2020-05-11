@@ -140,13 +140,13 @@
             this.isCheckedAll = ko.observable(1);
             if (invoices && invoices.length) {
                 invoices.forEach((invoice) => {
-                    const sepaData = JSON.parse(invoice.sepa_data);
+                    const sepaFields = ['sepa', 'sepa_date', 'bic', 'iban'];
                     const emptySepaFields = [];
-                    for (const field in sepaData) {
-                        if (!sepaData[field]) {
+                    sepaFields.forEach((field) => {
+                        if (!invoice[field]) {
                             emptySepaFields.push(field);
                         }
-                    }
+                    });
                     this.invoicesData.push({
                         isChecked: ko.observable(invoice.is_filled_sepa_data),
                         emptySepaFields: emptySepaFields.join(', '),

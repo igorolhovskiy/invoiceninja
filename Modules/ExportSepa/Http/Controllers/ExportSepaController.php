@@ -164,7 +164,7 @@ class ExportSepaController extends BaseController
                 . " OR IFNULL(bic, '') = '' or IFNULL(iban, '') = '' "
                 . " THEN FALSE ELSE TRUE END) as is_filled_sepa_data"
             ))
-            ->addSelect(DB::raw("JSON_OBJECT('sepa', sepa, 'sepa_date', sepa_date, 'bic', bic, 'iban', iban) as sepa_data"))
+            ->addSelect(DB::raw("sepa, sepa_date, bic, iban"))
             ->orderBy('invoices.invoice_number')
             ->get();
 
