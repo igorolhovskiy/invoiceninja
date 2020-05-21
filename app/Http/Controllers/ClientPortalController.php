@@ -112,28 +112,17 @@ class ClientPortalController extends BaseController
 
         // Add cdr to invoice
         if ($client->is_cdr_attach_invoice) {
-            $cdrTable = [
-                ['DID', 'Datetime', 'Destination', 'Duration', 'Cost']
-            ];
-            $cdrs = \App\Models\Cdr::select('did', 'datetime', 'dst', 'dur', 'cost')
-                ->where('invoice_id', $invoice->id)
-                ->orderBy('datetime')
-                ->get();
-            foreach ($cdrs as $cdr) {
-                $cdrTable[] = [$cdr->did, $cdr->datetime, $cdr->dst, $cdr->dur, $cdr->cost];
+            $content = $this->buildCdrDestinationReportContent($invoice);
+            if ( $content ) {      
+                $template = json_decode($invoice->invoice_design->javascript);
+                $template->content[] = (object) [
+                    'text' => ' ',
+                    'pageBreak' => 'before'
+                ];
+                $template->content[] = $content;
+                $invoice->invoice_design->javascript = json_encode($template);
             }
-            $template = json_decode($invoice->invoice_design->javascript);
-            $template->content[] = (object) [
-                'table' => (object) [
-                    'headerRows' => 1,
-                    'widths' => [ 'auto', 'auto', '*', 'auto', 100 ],
-                    'body' => $cdrTable,
-                ],
-                'pageBreak' => 'before'
-            ];
-            $invoice->invoice_design->javascript = json_encode($template);
         }
-
         $contact = $invitation->contact;
         $contact->setVisible([
             'first_name',
@@ -254,10 +243,26 @@ class ClientPortalController extends BaseController
         }
 
         $report = $this->cdrRepo->invoiceDestinationReport($invoice);
-        if ( $report->count() === 0 ) {
+        $content = $this->buildCdrDestinationReportContent($invoice);
+        if ( !$content ) {      
             return response()->view('error', [
                 'error' => 'Cdrs records not found',
             ]);
+        }
+
+        $data = [
+            'account' => $account,
+            'invoice' => $invoice->hidePrivateFields(),
+            'content' => json_encode($content),
+        ];
+
+        return View::make('invoices.cdr-destination-report', $data);
+    }
+
+    private function buildCdrDestinationReportContent($invoice) {
+        $report = $this->cdrRepo->invoiceDestinationReport($invoice);
+        if ( $report->count() === 0 ) {
+            return false;
         }
         $totalDuration = 0;
         $totalCost = 0;
@@ -269,7 +274,7 @@ class ClientPortalController extends BaseController
             $item->formattedDuration = Utils::secondsToHuman($item->duration);
         }
         $data = [
-            'account' => $account,
+            'account' => $invoice->account,
             'invoice' => $invoice->hidePrivateFields(),
             'report' => $report,
             'totalDuration' => Utils::secondsToHuman($totalDuration),
@@ -278,7 +283,133 @@ class ClientPortalController extends BaseController
             'period' => $this->cdrRepo->getCdrPeriodForInvoice($invoice),
         ];
 
-        return View::make('invoices.cdr-destination-report', $data);
+        $reportRow = [];
+        foreach ($data['report'] as $report) {
+            $reportRow[] = [
+                [
+                    'text' => $report->destination_name,
+                    'alignment' => 'right',
+                    'fillColor' => '#FFFFFF',
+                    'border' => [false, false, false, true]
+                ],
+                [
+                    'text' => $report->cnt,
+                    'alignment' => 'center',
+                    'fillColor' => '#FFFFFF',
+                    'border' => [false, false, false, true]
+                ],
+                [
+                    'text' => $report->formattedDuration,
+                    'alignment' => 'center',
+                    'fillColor' => '#FFFFFF',
+                    'border' => [false, false, false, true]
+                ],
+                [
+                    'text' => number_format($report->cost, 2, ',', '') . ' €',
+                    'alignment' => 'right',
+                    'fillColor' => '#FFFFFF',
+                    'border' => [false, false, false, true]
+                ],
+            ];
+        }
+
+        $content = [];
+        $content[] = (object) [
+            'text' => '',
+            'margin'=> [0, 8],
+        ];
+        $content[] = (object) [
+            'layout' => (object) [
+                'hLineWidth' => '$amount:1',
+                'vLineWidth' => '$none',
+                'paddingTop' => '$amount:8',
+                'paddingBottom' => '$amount:8',
+            ],
+            'table' => (object) [
+                'headerRows' => 1,
+                'widths' => [ 'auto', '*' ],
+                'body' => [
+                    [
+                        [
+                            (object) [
+                                'text' => 'Summary of Calls', 
+                                'bold' => true
+                            ],
+                            (object) [
+                                'text' => "of {$data['invoice']->client->name}", 
+                                'bold' => true
+                            ],
+                            (object) [
+                                'text' => "from {$data['period']['period_from']} to {$data['period']['period_to']} (inclusive)",
+                                'bold' => true
+                            ]
+                        ],
+                        ''
+                    ]
+                ],
+            ],
+        ];
+        $content[] = (object) [
+            'text' => 'Note: all costs are VAT excluded.', 
+            'margin' => [0, 8], 
+            'italics' => true 
+        ];
+        $content[] = (object) [
+            'layout' => (object) [
+                'hLineWidth' => '$amount:1',
+                'vLineWidth' => '$none',
+                'hLineColor' => '#E6E6E6',
+                'fillColor' => '#E6E6E6',
+            ],
+            'table' => (object) [
+                'headerRows' => 1,
+                'widths' => [ 275, 'auto', '*', 'auto' ],
+                'body' => array_merge(
+                [
+                    [ 
+                        [
+                            [
+                            'text' => $data['invoice']->client->name, 
+                            'bold' => true,
+                            'alignment' => 'right'
+                            ],
+                            [ 'text' => ' ', 'alignment' => 'right'],
+                            [ 'text' => 'Totals', 'bold' => true, 'alignment' => 'right']
+                        ],
+                        [
+                            ['text' => ' '],
+                            ['text' => 'Nr', 'bold' => true, 'alignment' => 'center'],
+                            ['text' => $data['totalCount'], 'bold' => true, 'alignment' => 'center']
+                        ],
+                        [
+                            ['text' => ' '],
+                            ['text' => 'Duration', 'bold' => true, 'alignment' => 'center'],
+                            ['text' => $data['totalDuration'], 'bold' => true, 'alignment' => 'center']
+                        ],
+                        [
+                            ['text' => ' '],
+                            ['text' => 'Cost', 'bold' => true, 'alignment' => 'right'],
+                            ['text' => number_format($data['totalCost'], 2, ',', '') . ' €', 'bold' => true, 'alignment' => 'right']
+                        ],                                    
+                    ],
+                    [ 
+                        [
+                            'text' => 'Locations', 
+                            'alignment' => 'right', 
+                            'bold' => true,
+                            'fillColor' => '#FFFFFF',
+                            'border' => [false, false, false, false],
+                        ], 
+                        [ 'text' => ' ', 'fillColor' => '#FFFFFF', 'border' => [false, false, false, false],],
+                        [ 'text' => ' ', 'fillColor' => '#FFFFFF', 'border' => [false, false, false, false],],
+                        [ 'text' => ' ', 'fillColor' => '#FFFFFF', 'border' => [false, false, false, false],]
+                    ]
+                ],
+                $reportRow
+                )
+            ]
+        ];
+        return $content;
     }
 
     private function getPaymentTypes($account, $client, $invitation)

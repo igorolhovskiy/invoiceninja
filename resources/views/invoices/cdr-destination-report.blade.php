@@ -105,9 +105,10 @@
           content: []
         };
         try {
-          var javascript = JSON.parse(NINJA.decodeJavascript(window.invoice, window.invoice.invoice_design.javascript));
+          var javascript = JSON.parse(NINJA.decodeJavascript(window.invoice, window.invoice.invoice_design.javascript), jsonCallBack);
           docDef.content.push(javascript.content[0]);
-          docDef.content = docDef.content.concat(buildReport());
+          const reportContent = JSON.parse('{!! $content !!}', jsonCallBack);
+          docDef.content = docDef.content.concat(reportContent);
           docDef.defaultStyle = javascript.defaultStyle;
           docDef.styles = javascript.styles;
           docDef.footer = javascript.footer;
@@ -117,90 +118,87 @@
         return pdfMake.createPdf(docDef);
       }
 
-      function buildReport() {
-        var data = {!! $report !!};
-        var reportRows = [];
-        data.forEach(function(item) {
-          reportRows.push([
-            {text: item.destination_name, alignment: 'right'},
-            {text: item.cnt, alignment: 'center'},
-            {text: item.formattedDuration, alignment: 'center'},
-            {text: '€ ' + item.cost, alignment: 'right'},            
-          ]);
-        });
-        report = [
-            { text: '', margin: [0, 8] },
-            {
-              layout: {
-                hLineWidth: function() { return 1; },
-                vLineWidth: function() { return 0; },
-                paddingTop: function() { return 8; },
-                paddingBottom: function() { return 8; },
-              },
-              table: {
-                // headers are automatically repeated if the table spans over multiple pages
-                // you can declare how many rows should be treated as headers
-                headerRows: 1,
-                widths: ['auto', '*'],
+      // Function from built.js for compatibility with content of report
+      function jsonCallBack(key, val) {
 
-                body: [
-                  [ 
-                    [
-                    {text: 'Summary of Calls', bold: true},
-                    {text: 'of ' + invoice.client.name, bold: true},
-                    {text: 'from {{$period['period_from']}} to {{$period['period_to']}} (inclusive)', bold: true}
-                    ], 
-                  '']
-                ]
-              }
-            },
-            { text: 'Note: all costs are VAT excluded.', margin: [0, 8], italics: true },
-            {
-              layout: {
-                fillColor: function (rowIndex, node, columnIndex) {
-                  return (rowIndex === 0) ? '#CCCCCC' : null;
-                },
-                hLineWidth: function (i, node) {
-                  return i === 0 || i === 2 ? 0 : 1;
-                },
-                vLineWidth: function() { return 0; },
-                hLineColor: function (i) {
-                  return i === 1 ? 'black' : 'lightgrey';
-                },
-              },
-              table: {
-                headerRows: 1,
-                widths: [ 275, 'auto', '*', 'auto' ],
-                body: [
-                  [ 
-                    [
-                      {text: invoice.client.name, bold:true, alignment: 'right'},
-                      {text: ' ', alignment: 'right'},
-                      {text: 'Totals', bold: true, alignment: 'right'}
-                    ],
-                    [
-                      {text: ' '},
-                      {text: 'Nr', bold: true, alignment: 'center'},
-                      {text: '{{$totalCount}}', bold: true, alignment: 'center'}
-                    ],
-                    [
-                      {text: ' '},
-                      {text: 'Duration', bold: true, alignment: 'center'},
-                      {text: '{{$totalDuration}}', bold: true, alignment: 'center'}
-                    ],
-                    [
-                      {text: ' '},
-                      {text: 'Cost', bold: true, alignment: 'right'},
-                      {text: '€ {{$totalCost}}', bold: true, alignment: 'right'}
-                    ],                                    
-                  ],
-                  [ {text: 'Locations', alignment: 'right', bold: true}, ' ', ' ', ' ' ],
-                ].concat(reportRows)
-              }
-            }     
-          ];
-        return report;
-      }
+        // handle custom functions
+        if (typeof val === 'string') {
+            if (val.indexOf('$firstAndLast') === 0) {
+                var parts = val.split(':');
+                return function (i, node) {
+                    return (i === 0 || i === node.table.body.length) ? parseFloat(parts[1]) : 0;
+                };
+            } else if (val.indexOf('$none') === 0) {
+                return function (i, node) {
+                    return 0;
+                };
+            } else if (val.indexOf('$notFirstAndLastColumn') === 0) {
+                var parts = val.split(':');
+                return function (i, node) {
+                    return (i === 0 || i === node.table.widths.length) ? 0 : parseFloat(parts[1]);
+                };
+            } else if (val.indexOf('$notFirst') === 0) {
+                var parts = val.split(':');
+                return function (i, node) {
+                    return i === 0 ? 0 : parseFloat(parts[1]);
+                };
+            } else if (val.indexOf('$amount') === 0) {
+                var parts = val.split(':');
+                return function (i, node) {
+                    return parseFloat(parts[1]);
+                };
+            } else if (val.indexOf('$primaryColor') === 0) {
+                var parts = val.split(':');
+                return NINJA.primaryColor || parts[1];
+            } else if (val.indexOf('$secondaryColor') === 0) {
+                var parts = val.split(':');
+                return NINJA.secondaryColor || parts[1];
+            }
+        }
+
+        // determine whether or not to show the header/footer
+        if (invoice.features.customize_invoice_design) {
+            if (key === 'header') {
+                return function(page, pages) {
+                    if (page === 1 || invoice.account.all_pages_header == '1') {
+                        if (invoice.features.remove_created_by) {
+                            return NINJA.updatePageCount(JSON.parse(JSON.stringify(val)), page, pages);
+                        } else {
+                            return val;
+                        }
+                    } else {
+                        return '';
+                    }
+                }
+            } else if (key === 'footer') {
+                return function(page, pages) {
+                    if (page === pages || invoice.account.all_pages_footer == '1') {
+                        if (invoice.features.remove_created_by) {
+                            return NINJA.updatePageCount(JSON.parse(JSON.stringify(val)), page, pages);
+                        } else {
+                            return val;
+                        }
+                    } else {
+                        return '';
+                    }
+                }
+            }
+        }
+
+        // check for markdown
+        if (key === 'text') {
+            val = NINJA.parseMarkdownText(val, true);
+        }
+
+        /*
+        if (key === 'stack') {
+            val = NINJA.parseMarkdownStack(val);
+            val = NINJA.parseMarkdownText(val, false);
+        }
+        */
+
+        return val;
+      }      
     </script>
   </div>
 @stop
