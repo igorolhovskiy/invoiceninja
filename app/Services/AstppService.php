@@ -71,7 +71,7 @@ class AstppService
         'astpp_cdr_uniqueid' => $cdr->uniqueid,
         'did' => $cdr->callerid,
         'datetime' => $cdr->callstart,
-        'dst' => $cdr->callednum,
+        'dst' => $cdr->translated_dst,
         'dur' => $cdr->billseconds
       ]);
       $counter += 1;
