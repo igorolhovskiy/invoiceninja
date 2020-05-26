@@ -19,7 +19,7 @@ class ExportSepa extends EntityModel
     /**
      * @var string
      */
-    protected $fillable = [""];
+    protected $fillable = ["requested_collection_date"];
 
     /**
      * @var string

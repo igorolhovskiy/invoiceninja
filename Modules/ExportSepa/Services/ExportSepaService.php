@@ -33,7 +33,7 @@ class ExportSepaService
         'localInstrumentCode' => 'CORE',
         'sequenceType' => $account->sepa_payment_sequence_type
       ],
-      'reqdColltnDt' => $createDate->copy()->addDay()->toDateString(),
+      'reqdColltnDt' => Carbon::parse($exportSepa->requested_collection_date)->toDateString(),
       'creditorName' => $account->sepa_initiating_party_name,
       'creditorIban' => $account->sepa_payment_iban,
       'creditorBic' => $account->sepa_payment_bic,

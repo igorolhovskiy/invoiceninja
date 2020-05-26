@@ -14,13 +14,34 @@
     {!! Former::open($url)
             ->addClass('col-md-12 warn-on-exit')
             ->method($method)
-            ->rules([]) !!}
+            ->rules(array(
+                'requested_collection_date' => 'required'
+        	))  !!}
     @endif
     <div class="row">
         <div class="col-md-10 col-md-offset-1">    
             <div class="panel panel-default">
                 <div class="panel-body">
-                    @if ($method === 'POST')
+                    <div class="row" style="margin-top: 16px;">
+                        <div class="col-xs-12 col-md-8">
+                        @if ($method === 'POST') 
+                            {!! Former::text('requested_collection_date')
+                                ->data_bind("datePicker: requested_collection_date, valueUpdate: 'afterkeydown'")
+                                ->label('Requested collection date:')
+                                ->data_date_format(Session::get(SESSION_DATE_PICKER_FORMAT, DEFAULT_DATE_PICKER_FORMAT))->appendIcon('calendar')->addGroupClass('requested_collection_date') !!}
+                        @else
+                            <div class="form-group">
+                                <label class="col-lg-4 col-sm-4">
+                                    Requested collection date:
+                                </label>
+                                <div class="col-lg-8 col-sm-8">
+                                    {{$exportsepa->requested_collection_date}}
+                                </div>
+                            </div>
+                        @endif
+                        </div>
+                    </div>                
+                    @if ($method === 'POST')                  
                     <h4>Select invoices for export:</h3>
                     @else
                     <h4>Invoices to export:</h3>
@@ -109,12 +130,17 @@
 
         $(function() {
             $(".warn-on-exit input").first().focus();
+            $('#requested_collection_date').datepicker();
+            $('.requested_collection_date .input-group-addon').click(function() {
+                toggleDatePicker('requested_collection_date');
+            });               
         })
 
         const pageSize = 10;
         const invoices = @if ($invoices) {!! $invoices !!} @else null @endif;
 
         function ViewModel() {
+            this.requested_collection_date = ko.observable(moment().add(1, 'days').toDate());
             // Pagination model
             this.page = ko.observable(1);
             this.total = ko.observable(invoices.length);

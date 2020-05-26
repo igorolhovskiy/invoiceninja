@@ -3,6 +3,8 @@
 namespace Modules\ExportSepa\Repositories;
 
 use DB;
+use Utils;
+
 use Modules\ExportSepa\Models\ExportSepa;
 use App\Ninja\Repositories\BaseRepository;
 use App\Ninja\Repositories\PaymentRepository;
@@ -60,6 +62,7 @@ class ExportsepaRepository extends BaseRepository
     {
         $entity = $exportsepa ?: Exportsepa::createNew();
         
+        $entity->requested_collection_date = Utils::toSqlDate($data['requested_collection_date']);
         $entity->save();
 
         $account = $entity->account;
