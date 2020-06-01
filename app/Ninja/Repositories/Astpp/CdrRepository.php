@@ -8,6 +8,8 @@ class CdrRepository
 {
   public function getCdr($accountId, $start, $end) {
     return Cdr::where('accountid', $accountId)
+      ->where('calltype', 'STANDARD')
+      ->where('billseconds', '>', 0)
       ->whereBetween('callstart', [$start, $end])
       ->get();
   }
