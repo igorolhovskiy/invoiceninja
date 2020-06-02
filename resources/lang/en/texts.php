@@ -3181,6 +3181,8 @@ $LANG = array(
     'archived_templates' => 'Successfully archived :count templates',
     'deleted_template' => 'Successfully deleted quote',
     'deleted_templates' => 'Successfully deleted :count templates',
+    'allow_edit_draft_only_invoice' => 'Allow edit Draft only',
+    'allow_edit_draft_only_invoice_help' => 'Not allow edit not Draft Invoices',
 );
 
 return $LANG;

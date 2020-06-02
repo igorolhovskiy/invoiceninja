@@ -389,6 +389,10 @@
                                 ->text(trans('texts.enable'))
                                 ->blockHelp(trans('texts.auto_archive_invoice_help'))
                                 ->value(1) !!}
+                        {!! Former::checkbox('allow_edit_draft_only_invoice')
+                                ->text(trans('texts.enable'))
+                                ->blockHelp(trans('texts.allow_edit_draft_only_invoice_help'))
+                                ->value(1) !!}                                
                     </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="quote_workflow">

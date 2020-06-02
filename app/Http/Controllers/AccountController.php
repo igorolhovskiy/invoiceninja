@@ -1001,6 +1001,7 @@ class AccountController extends BaseController
                 $account->auto_archive_quote = Input::get('auto_archive_quote');
                 $account->auto_archive_invoice = Input::get('auto_archive_invoice');
                 $account->auto_email_invoice = Input::get('auto_email_invoice');
+                $account->allow_edit_draft_only_invoice = Input::get('allow_edit_draft_only_invoice');
                 $account->recurring_invoice_number_prefix = Input::get('recurring_invoice_number_prefix');
 
                 $account->client_number_prefix = trim(Input::get('client_number_prefix'));
