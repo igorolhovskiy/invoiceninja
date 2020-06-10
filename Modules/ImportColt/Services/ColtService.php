@@ -245,7 +245,10 @@ class ColtService
             ->whereNull('invoice_id')
             ->update(['invoice_id' => $invoice->id]);
 
-        $this->cdrRepository->attachCdrToInvoice($invoice);
+        // @deprecated $this->cdrRepository->attachCdrToInvoice($invoice);
+
+        // Attach PDF cdr to invoice instead of csv format
+        $this->cdrRepository->attachPdfCdrToInvoice($invoice);
 
         $this->cdrRepository->attachDestinationReportToInvoice($invoice);
         

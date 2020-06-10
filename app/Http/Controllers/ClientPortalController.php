@@ -242,7 +242,6 @@ class ClientPortalController extends BaseController
             $invoice->invoice_design->javascript = $invoice->invoice_design->pdfmake;
         }
 
-        $report = $this->cdrRepo->invoiceDestinationReport($invoice);
         $content = $this->buildCdrDestinationReportContent($invoice);
         if ( !$content ) {      
             return response()->view('error', [
@@ -257,6 +256,128 @@ class ClientPortalController extends BaseController
         ];
 
         return View::make('invoices.cdr-destination-report', $data);
+    }
+
+    public function viewInvoiceCdrList($invitationKey)
+    {
+        if (! $invitation = $this->invoiceRepo->findInvoiceByInvitation($invitationKey)) {
+            return $this->returnError();
+        }
+
+        $invoice = $invitation->invoice;
+        $client = $invoice->client;
+        $account = $invoice->account;
+
+        if (request()->silent) {
+            session(['silent:' . $client->id => true]);
+            return redirect(request()->url() . (request()->borderless ? '?borderless=true' : ''));
+        }
+
+        if (! $account->checkSubdomain(Request::server('HTTP_HOST'))) {
+            return response()->view('error', [
+                'error' => trans('texts.invoice_not_found'),
+            ]);
+        }
+
+        Session::put($invitation->invitation_key, true); // track this invitation has been seen
+        Session::put('contact_key', $invitation->contact->contact_key); // track current contact
+
+        $invoice->features = [
+            'customize_invoice_design' => $account->hasFeature(FEATURE_CUSTOMIZE_INVOICE_DESIGN),
+            'remove_created_by' => $account->hasFeature(FEATURE_REMOVE_CREATED_BY),
+            'invoice_settings' => $account->hasFeature(FEATURE_INVOICE_SETTINGS),
+        ];
+        $invoice->invoice_fonts = $account->getFontsData();
+
+        if ($design = $account->getCustomDesign($invoice->invoice_design_id)) {
+            $invoice->invoice_design->javascript = $design;
+        } else {
+            $invoice->invoice_design->javascript = $invoice->invoice_design->pdfmake;
+        }
+        $content = [];
+        $cdrs = $this->cdrRepo->getCdrsForInvoice($invoice);
+        $reportRow = [];
+        $totalDuration = 0;
+        $totalCost = 0;
+        foreach ($cdrs as $cdr) {
+            $reportRow[] = [
+                [
+                    'text' => $cdr->did,
+                    'alignment' => 'left',
+                    'fillColor' => '#FFFFFF',
+                    'border' => [false, false, false, true]
+                ],
+                [
+                    'text' => $cdr->datetime,
+                    'alignment' => 'left',
+                    'fillColor' => '#FFFFFF',
+                    'border' => [false, false, false, true]
+                ],
+                [
+                    'text' => $cdr->dst,
+                    'alignment' => 'left',
+                    'fillColor' => '#FFFFFF',
+                    'border' => [false, false, false, true]
+                ],
+                [
+                    'text' => $cdr->dur,
+                    'alignment' => 'right',
+                    'fillColor' => '#FFFFFF',
+                    'border' => [false, false, false, true]
+                ],
+                [
+                    'text' => number_format($cdr->cost, 2, ',', '') . ' €',
+                    'alignment' => 'right',
+                    'fillColor' => '#FFFFFF',
+                    'border' => [false, false, false, true]
+                ],
+            ];
+            $totalDuration += $cdr->dur;
+            $totalCost += $cdr->cost;
+        }
+        $reportRow[] = [ 
+            [ 'text' => ' '],
+            [ 'text' => ' '],
+            [ 'text' => 'Total:', 'bold' => true, 'alignment' => 'left'],
+            [ 'text' => $totalDuration, 'bold' => true, 'alignment' => 'right'],
+            [ 'text' => number_format($totalCost, 2, ',', '') . ' €', 'bold' => true, 'alignment' => 'right']                                
+        ];
+        $content[] = (object) [
+            'text' => '',
+            'margin'=> [0, 8],
+        ];
+        $content[] = (object) [
+            'layout' => (object) [
+                'hLineWidth' => '$amount:1',
+                'vLineWidth' => '$none',
+                'hLineColor' => '#E6E6E6',
+                'fillColor' => '#E6E6E6',
+            ],
+            'table' => (object) [
+                'headerRows' => 1,
+                'widths' => [ '*', '*', '*', '*', '*'],
+                'body' => array_merge(
+                [
+                    [ 
+                        [ 'text' => 'DID', 'bold' => true, 'alignment' => 'left'],
+                        [ 'text' => 'Datetime', 'bold' => true, 'alignment' => 'left'],
+                        [ 'text' => 'Destination', 'bold' => true, 'alignment' => 'left'],
+                        [ 'text' => 'Duration', 'bold' => true, 'alignment' => 'right'],
+                        [ 'text' => 'Cost', 'bold' => true, 'alignment' => 'right']                                
+                    ],
+                ],
+                $reportRow
+                )
+            ]
+        ];
+
+        $data = [
+            'account' => $account,
+            'invoice' => $invoice->hidePrivateFields(),
+            'content' => json_encode($content),
+        ];
+
+        return View::make('invoices.cdr-list', $data);
     }
 
     private function buildCdrDestinationReportContent($invoice) {

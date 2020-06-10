@@ -120,15 +120,19 @@ class CdrRepository extends BaseRepository
         ];
     }
 
+    public function getCdrsForInvoice($invoice) {
+        return \App\Models\Cdr::select('did', 'datetime', 'dst', 'dur', 'cost')
+            ->where('invoice_id', $invoice->id)
+            ->orderBy('datetime')
+            ->get();
+    }
+
     public function exportCdr($invoice) {
         // TODO: create spearte method to build cdr data
         $cdrTable = [
             ['DID', 'Datetime', 'Destination', 'Duration', 'Cost']
         ];
-        $cdrs = \App\Models\Cdr::select('did', 'datetime', 'dst', 'dur', 'cost')
-            ->where('invoice_id', $invoice->id)
-            ->orderBy('datetime')
-            ->get();
+        $cdrs = $this->getCdrsForInvoice($invoice);
 
         foreach ($cdrs as $cdr) {
             $cdrTable[] = [$cdr->did, $cdr->datetime, $cdr->dst, $cdr->dur, $cdr->cost];
@@ -161,10 +165,7 @@ class CdrRepository extends BaseRepository
         $cdrTable = [
             ['DID', 'Datetime', 'Destination', 'Duration', 'Cost']
         ];
-        $cdrs = \App\Models\Cdr::select('did', 'datetime', 'dst', 'dur', 'cost')
-            ->where('invoice_id', $invoice->id)
-            ->orderBy('datetime')
-            ->get();
+        $cdrs = $this->getCdrsForInvoice($invoice);
         if ($cdrs->count() === 0) {
             return null;
         }
@@ -212,6 +213,53 @@ class CdrRepository extends BaseRepository
         return $document;
     }
 
+    public function attachPdfCdrToInvoice($invoice) {
+        if (!$invoice->client->is_cdr_attach_invoice) {
+            return false;
+        }
+        $cdrCount = \App\Models\Cdr::where('invoice_id', $invoice->id)
+            ->count();
+        if ($cdrCount === 0) {
+            return null;
+        }
+
+        $pdfString = $this->getPDFStringInvoiceByLink("/cdr-list", $invoice);
+        if (!$pdfString) {
+            return null;
+        }
+        $document = Document::createNew();
+        $disk = $document->getDisk();
+        $putStream = tmpfile();
+        fwrite($putStream, $pdfString);
+
+        $fstatStream = fstat($putStream);
+        $streamMetaData = stream_get_meta_data($putStream);
+
+        rewind($putStream);
+
+        $documentType = 'pdf';
+        $documentTypeData = Document::$types[$documentType];
+        $name = "CDR list {$invoice->invoice_number}.{$documentType}";
+        $hash = sha1_file($streamMetaData['uri']);
+        $filename = \Auth::user()->account->account_key.'/'.$hash.'.pdf';
+        
+        $disk->getDriver()->putStream($filename, $putStream, ['mimetype' => $documentTypeData['mime']]);
+        if (is_resource($putStream)) {
+            fclose($putStream);
+        }
+
+        $size = $fstatStream['size'];
+        $document->invoice_id = $invoice->id;
+        $document->path = $filename;
+        $document->type = $documentType;
+        $document->size = $size;
+        $document->hash = $hash;
+        $document->name = substr($name, -255);       
+        $document->save();
+
+        return $document;        
+    }
+
     public function attachDestinationReportToInvoice($invoice)
     {
         $cdrCount = \App\Models\Cdr::where('invoice_id', $invoice->id)
@@ -220,7 +268,7 @@ class CdrRepository extends BaseRepository
             return null;
         }
 
-        $pdfString = $this->getPDFStringDestinationReport($invoice);
+        $pdfString = $this->getPDFStringInvoiceByLink("/cdr-destination-report", $invoice);
         if (!$pdfString) {
             return null;
         }
@@ -260,7 +308,7 @@ class CdrRepository extends BaseRepository
     /**
      * @return bool|string
      */
-    public function getPDFStringDestinationReport($invoice, $decode = true)
+    public function getPDFStringInvoiceByLink($route_link, $invoice, $decode = true)
     {
         if (! env('PHANTOMJS_CLOUD_KEY') && ! env('PHANTOMJS_BIN_PATH')) {
             return false;
@@ -271,7 +319,7 @@ class CdrRepository extends BaseRepository
         }
 
         $invitation = $invoice->invitations[0];
-        $link = $invitation->getLink('view', true, true) . "/cdr-destination-report";
+        $link = $invitation->getLink('view', true, true) . $route_link;
         $pdfString = false;
         $phantomjsSecret = env('PHANTOMJS_SECRET');
         $phantomjsLink = $link . "?phantomjs=true&phantomjs_secret={$phantomjsSecret}";

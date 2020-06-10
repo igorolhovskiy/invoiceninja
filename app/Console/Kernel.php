@@ -32,6 +32,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\UpdateKey',
         'App\Console\Commands\StartRateMachine',
         'App\Console\Commands\AttachCdrReportToInvoice',
+        'App\Console\Commands\AttachCdrListToInvoice',
     ];
 
     /**
