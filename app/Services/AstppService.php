@@ -168,12 +168,13 @@ class AstppService
     }
     $invoice = Invoice::createNew($recurInvoice);
     $invoice->is_public = true;
+    $invoice->public_id = 0;
     $invoice->invoice_type_id = INVOICE_TYPE_STANDARD;
     $invoice->client_id = $recurInvoice->client_id;
     $invoice->recurring_invoice_id = $recurInvoice->id;
     $invoice->invoice_number = $recurInvoice->account->getNextNumber($invoice);
-    $invoice->amount = $totalSum;
-    $invoice->balance = $totalSum;
+    $invoice->amount = null;
+    $invoice->balance = null;
     $invoice->invoice_date = date_create()->format('Y-m-d');
     $invoice->discount = $recurInvoice->discount;
     $invoice->po_number = $recurInvoice->po_number;
@@ -193,24 +194,18 @@ class AstppService
     $invoice->custom_text_value2 = Utils::processVariables($recurInvoice->custom_text_value2, $client);
     $invoice->is_amount_discount = $recurInvoice->is_amount_discount;
     $invoice->due_date = $recurInvoice->getDueDate();
-    $invoice->save();
+    $invoice->invoice_items = collect([]);
 
     foreach ($recurInvoice->invoice_items as $recurItem) {
-        $item = InvoiceItem::createNew($recurItem);
-        $item->product_id = $recurItem->product_id;
-        $item->qty = $recurItem->qty;
-        $item->cost = $recurItem->cost;
-        $item->notes = Utils::processVariables($recurItem->notes, $client);
-        $item->product_key = Utils::processVariables($recurItem->product_key, $client);
-        $item->tax_name1 = $recurItem->tax_name1;
-        $item->tax_rate1 = $recurItem->tax_rate1;
-        $item->tax_name2 = $recurItem->tax_name2;
-        $item->tax_rate2 = $recurItem->tax_rate2;
-        $item->custom_value1 = Utils::processVariables($recurItem->custom_value1, $client);
-        $item->custom_value2 = Utils::processVariables($recurItem->custom_value2, $client);
-        $item->discount = $recurItem->discount;
-        $invoice->invoice_items()->save($item);
+        $item = $recurItem->toArray();
+        $item['notes'] = Utils::processVariables($recurItem->notes, $client);
+        $item['product_key'] = Utils::processVariables($recurItem->product_key, $client);
+        $item['custom_value1'] = Utils::processVariables($recurItem->custom_value1, $client);
+        $item['custom_value2'] = Utils::processVariables($recurItem->custom_value2, $client);
+        $invoice->invoice_items->push($item);
     }
+    // Save invoice using repository logic
+    $invoice = $this->invoiceRepo->save($invoice->toArray());
 
     foreach ($recurInvoice->documents as $recurDocument) {
         $document = $recurDocument->cloneDocument();
