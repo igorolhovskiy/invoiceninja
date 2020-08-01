@@ -167,7 +167,6 @@ class AstppService
         return false;
     }
     $invoice = Invoice::createNew($recurInvoice);
-    $invoice->is_public = true;
     $invoice->public_id = 0;
     $invoice->invoice_type_id = INVOICE_TYPE_STANDARD;
     $invoice->client_id = $recurInvoice->client_id;
