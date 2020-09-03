@@ -15,9 +15,11 @@ return array(
     'Modules\\ExportSepa\\Http\\Requests\\ExportSepaRequest' => $baseDir . '/Http/Requests/ExportSepaRequest.php',
     'Modules\\ExportSepa\\Http\\Requests\\UpdateExportSepaRequest' => $baseDir . '/Http/Requests/UpdateExportSepaRequest.php',
     'Modules\\ExportSepa\\Models\\ExportSepa' => $baseDir . '/Models/ExportSepa.php',
+    'Modules\\ExportSepa\\Models\\ExportSepaItem' => $baseDir . '/Models/ExportSepaItem.php',
     'Modules\\ExportSepa\\Policies\\ExportsepaPolicy' => $baseDir . '/Policies/ExportSepaPolicy.php',
     'Modules\\ExportSepa\\Presenters\\ExportsepaPresenter' => $baseDir . '/Presenters/ExportSepaPresenter.php',
     'Modules\\ExportSepa\\Providers\\ExportSepaServiceProvider' => $baseDir . '/Providers/ExportSepaServiceProvider.php',
     'Modules\\ExportSepa\\Repositories\\ExportsepaRepository' => $baseDir . '/Repositories/ExportSepaRepository.php',
+    'Modules\\ExportSepa\\Services\\ExportSepaService' => $baseDir . '/Services/ExportSepaService.php',
     'Modules\\ExportSepa\\Transformers\\ExportsepaTransformer' => $baseDir . '/Transformers/ExportSepaTransformer.php',
 );

@@ -30,10 +30,12 @@ class ComposerStaticInitb4f7e202a7487709c362bca3bb89ed46
         'Modules\\ExportSepa\\Http\\Requests\\ExportSepaRequest' => __DIR__ . '/../..' . '/Http/Requests/ExportSepaRequest.php',
         'Modules\\ExportSepa\\Http\\Requests\\UpdateExportSepaRequest' => __DIR__ . '/../..' . '/Http/Requests/UpdateExportSepaRequest.php',
         'Modules\\ExportSepa\\Models\\ExportSepa' => __DIR__ . '/../..' . '/Models/ExportSepa.php',
+        'Modules\\ExportSepa\\Models\\ExportSepaItem' => __DIR__ . '/../..' . '/Models/ExportSepaItem.php',
         'Modules\\ExportSepa\\Policies\\ExportsepaPolicy' => __DIR__ . '/../..' . '/Policies/ExportSepaPolicy.php',
         'Modules\\ExportSepa\\Presenters\\ExportsepaPresenter' => __DIR__ . '/../..' . '/Presenters/ExportSepaPresenter.php',
         'Modules\\ExportSepa\\Providers\\ExportSepaServiceProvider' => __DIR__ . '/../..' . '/Providers/ExportSepaServiceProvider.php',
         'Modules\\ExportSepa\\Repositories\\ExportsepaRepository' => __DIR__ . '/../..' . '/Repositories/ExportSepaRepository.php',
+        'Modules\\ExportSepa\\Services\\ExportSepaService' => __DIR__ . '/../..' . '/Services/ExportSepaService.php',
         'Modules\\ExportSepa\\Transformers\\ExportsepaTransformer' => __DIR__ . '/../..' . '/Transformers/ExportSepaTransformer.php',
     );
 

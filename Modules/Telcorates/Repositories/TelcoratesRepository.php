@@ -4,6 +4,7 @@ namespace Modules\Telcorates\Repositories;
 
 use DB;
 use Modules\Telcorates\Models\Telcorates;
+use Modules\Telcorates\Models\TelcorateCode;
 use App\Ninja\Repositories\BaseRepository;
 //use App\Events\TelcoratesWasCreated;
 //use App\Events\TelcoratesWasUpdated;
@@ -39,13 +40,17 @@ class TelcoratesRepository extends BaseRepository
         $this->applyFilters($query, 'telcorates');
 
         if ($filter) {
-            $query->where('name', 'like', "%$filter%")
-                ->orWhere('description', 'like', "%$filter%");
+            $query->where(function ($filterQuery) use ($filter) {
+                $filterQuery->where('name', 'like', "%$filter%")
+                    ->orWhere('description', 'like', "%$filter%");
+            });
         }
-
         return $query;
     }
 
+    /**
+     * Save new telcorate with codes
+     */
     public function save($data, $telcorates = null)
     {
         $entity = $telcorates ?: Telcorates::createNew();
@@ -74,6 +79,26 @@ class TelcoratesRepository extends BaseRepository
         return $entity;
     }
 
+    /**
+     * Update telcorate header
+     */
+    public function update($data, $telcorates = null)
+    {
+        $entity = $telcorates ?: Telcorates::createNew();
+
+        $entity->fill($data);
+        $entity->save();
+        /*
+        if (!$publicId || intval($publicId) < 0) {
+            event(new ClientWasCreated($client));
+        } else {
+            event(new ClientWasUpdated($client));
+        }
+        */
+
+        return $entity;
+    }
+
     public function checkActiveClient($id) {
         $client = \App\Models\Client::scope()
             ->whereHas('invoices', function($query) use ($id) {
@@ -85,6 +110,54 @@ class TelcoratesRepository extends BaseRepository
             ->first();
 
         return $client;
-    }    
+    }
+    
+    public function getCode($telcorate, $search)
+    {
+        return TelcorateCode
+            ::where('telcorate_id', '=', $telcorate->id)
+            ->when($search, function($query, $search) {
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery->where('code', 'like', "%$search%")
+                        ->orWhere('description', 'like', "%$search%")
+                        ->orWhere('rate', 'like', "%$search%");
+                });
+            })
+            ->orderBy('code')
+            ->paginate(10);
+    }
 
+    public function addCode($telcorate, $data)
+    {
+        return $telcorate->codes()->create($data);
+    }
+
+    public function uploadCodes($telcorate, $codes)
+    {
+        foreach ($codes as $item) {
+            $telcorate->codes()->create($item);
+        }
+    }
+
+    public function updateCode($telcorate, $data)
+    {
+        return TelcorateCode
+            ::where('telcorate_id', '=', $telcorate->id)
+            ->where('id', '=', $data['id'])
+            ->update([
+                'code' => $data['code'],
+                'init_seconds' => $data['init_seconds'],
+                'increment_seconds' => $data['increment_seconds'],
+                'rate' => $data['rate'],
+                'description' => $data['description']
+            ]);
+    }
+
+    public function deleteCode($telcorate, $codeId)
+    {
+        return TelcorateCode
+            ::where('telcorate_id', '=', $telcorate->id)
+            ->where('id', '=', $codeId)
+            ->delete();
+    }
 }

@@ -61,7 +61,7 @@ class TelcoratesController extends BaseController
             'title' => mtrans('telcorates', 'new_telcorates'),
         ];
 
-        return view('telcorates::edit', $data);
+        return view('telcorates::create', $data);
     }
 
     /**
@@ -84,15 +84,55 @@ class TelcoratesController extends BaseController
     public function edit(TelcoratesRequest $request)
     {
         $telcorates = $request->entity();
-
         $data = [
             'telcorates' => $telcorates,
             'method' => 'PUT',
             'url' => 'telcorates/' . $telcorates->public_id,
+            'telcoCodesUrl' => '/api/telcorates/' . $telcorates->public_id . '/telcocodes',
             'title' => mtrans('telcorates', 'edit_telcorates'),
         ];
 
         return view('telcorates::edit', $data);
+    }
+
+    public function getCodes(TelcoratesRequest $request)
+    {
+        $telcorate = $request->entity();
+        return $this->telcoratesRepo->getCode($telcorate, $request->search);
+    }
+
+    public function addCode(TelcoratesRequest $request)
+    {
+        $telcorate = $request->entity();
+        return $this->telcoratesRepo->addCode($telcorate, $request->all());
+    }
+
+    public function bulkUploadCodes(TelcoratesRequest $request)
+    {
+        $this->validate($request, [
+            'codes' => 'required|array'
+        ]);
+        $telcorate = $request->entity();
+        return $this->telcoratesRepo->uploadCodes($telcorate, $request->codes);
+    }
+
+    public function updateCode(TelcoratesRequest $request)
+    {
+        $this->validate($request, [
+            'id' => 'required',
+            'code' => 'required'
+        ]);
+        $telcorate = $request->entity();
+        return $this->telcoratesRepo->updateCode($telcorate, $request->all());
+    }
+
+    public function deleteCode(TelcoratesRequest $request)
+    {
+        $this->validate($request, [
+            'id' => 'required',
+        ]);
+        $telcorate = $request->entity();
+        return $this->telcoratesRepo->deleteCode($telcorate, $request->id);
     }
 
     /**
@@ -111,7 +151,7 @@ class TelcoratesController extends BaseController
      */
     public function update(UpdateTelcoratesRequest $request)
     {
-        $telcorates = $this->telcoratesRepo->save($request->input(), $request->entity());
+        $telcorates = $this->telcoratesRepo->update($request->input(), $request->entity());
 
         // return response()->json([
         //     'success' => true,

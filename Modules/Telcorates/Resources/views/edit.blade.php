@@ -3,7 +3,14 @@
 @section('head')
 	@parent
     <script src="{{ asset('js/knockstrap.min.js') }}" type="text/javascript"></script>
-
+    <style>
+        .row-list {
+            border-top: 1px solid lightgrey;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            line-height: 40px;
+        }
+    </style>
 @stop
 
 @section('content')
@@ -59,58 +66,23 @@
                         Description
                     </div>
                 </div>
-                <div data-bind="foreach: {data: filteredCodes, afterRender: handleAfterAllRender}" id="rowsContainer">
-                    <div class="row"
-                        data-bind="visible: $index() >= ($parent.page() - 1) * $parent.pageSize() && $index() < $parent.page() * $parent.pageSize()">
-                        {!! Former::hidden('public_id')
-                            ->data_bind('value: id, attr: {name: \'codes[\' + $index() + \'][id]\'}')
-                        !!}
-                        <div class="col-md-2">
-                            <div class="form-group required">
-                                <div class="col-lg-12 col-sm-12">
-                                    <input class="form-control" 
-                                        data-bind="value: code, attr: {name: 'codes[' + $index() + '][code]'}" 
-                                        required type="text">
-                                </div>
-                            </div>                        
+                <div data-bind="foreach: {data: codes, afterRender: handleAfterAllRender}" id="rowsContainer">
+                    <div class="row row-list">
+                        <div class="col-md-2" data-bind="text: code">                     
                         </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <div class="col-lg-12 col-sm-12">
-                                    <input class="form-control" 
-                                        data-bind="value: init_seconds, attr: {name: 'codes[' + $index() + '][init_seconds]'}" 
-                                        type="text">
-                                </div>
-                            </div>                    
+                        <div class="col-md-2" data-bind="text: init_seconds">                 
                         </div>  
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <div class="col-lg-12 col-sm-12">
-                                    <input class="form-control" 
-                                        data-bind="value: increment_seconds, attr: {name: 'codes[' + $index() + '][increment_seconds]'}" 
-                                        type="text">
-                                </div>
-                            </div>                                           
+                        <div class="col-md-2" data-bind="text: increment_seconds">                                          
                         </div>     
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <div class="col-lg-12 col-sm-12">
-                                    <input class="form-control" 
-                                        data-bind="value: rate, attr: {name: 'codes[' + $index() + '][rate]'}" 
-                                        type="text">
-                                </div>
-                            </div>                                          
+                        <div class="col-md-2" data-bind="text: rate">                                      
                         </div>                                                       
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <div class="col-lg-12 col-sm-12">
-                                    <input class="form-control" 
-                                        data-bind="value: description, attr: {name: 'codes[' + $index() + '][description]'}" 
-                                        type="text">
-                                </div>
-                            </div>                                          
+                        <div class="col-md-2" data-bind="text: description">                                         
                         </div>
-                        <div class="col-md-1">
+                        <div class="col-md-2">
+                            {!! Button::primary()
+                                ->withAttributes(['data-bind' =>'click: $root.editCode.bind($data)'])
+                                ->appendIcon('<i class="fa fa-edit" aria-hidden="true"></i>')
+                            !!}    
                             {!! Button::danger()
                                 ->withAttributes(['data-bind' =>'click: $root.removeCode.bind($data)'])
                                 ->appendIcon('<i class="fa fa-times" aria-hidden="true"></i>')
@@ -131,7 +103,7 @@
                     <div class="col-md-12 text-center">
                         {!! 
                             Button::primary(trans('telcopackages::texts.add_code'))
-                            ->withAttributes(['data-bind' =>'click: addCode'])
+                            ->withAttributes(['data-bind' =>'click: onAddCodeClick'])
                             ->appendIcon(Icon::create('plus')) 
                         !!}
                         <button type="button" class="btn btn-info"
@@ -175,21 +147,248 @@
     {!! Former::close() !!}
 
 
+    <!-- Add code -->
+    <div class="modal fade" id="addCodeModal" tabindex="-1" role="dialog" aria-labelledby="addCodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Add Code</h4>
+            </div>
+
+            <div class="container" style="width: 100%; padding-bottom: 0px !important">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row" style="margin-top: 16px;">
+                            <div class="col-md-2">
+                                Code
+                            </div>
+                            <div class="col-md-2">
+                                Init Seconds
+                            </div> 
+                            <div class="col-md-2">
+                                Increment Seconds
+                            </div>  
+                            <div class="col-md-2">
+                                Rate
+                            </div>                                                           
+                            <div class="col-md-4">
+                                Description
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group required">
+                                    <div class="col">
+                                        <input class="form-control"
+                                            name="code"
+                                            data-bind="value: newItem.code" 
+                                            required type="text">
+                                    </div>
+                                </div>                        
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="col">
+                                        <input class="form-control" 
+                                            data-bind="value: newItem.init_seconds" 
+                                            type="text">
+                                    </div>
+                                </div>                    
+                            </div>  
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="col">
+                                        <input class="form-control" 
+                                            data-bind="value: newItem.increment_seconds" 
+                                            type="text">
+                                    </div>
+                                </div>                                           
+                            </div>     
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="col">
+                                        <input class="form-control" 
+                                            data-bind="value: newItem.rate" 
+                                            type="text">
+                                    </div>
+                                </div>                                          
+                            </div>                                                       
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col">
+                                        <input class="form-control" 
+                                            data-bind="value: newItem.description" 
+                                            type="text">
+                                    </div>
+                                </div>                                          
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" 
+                    data-bind="click: onAddItemClick, disable: isSubmitting()">
+                    <span data-bind="text: isSubmitting() ? 'Adding...' : 'Add code'"></span>
+                </button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit code -->
+    <div class="modal fade" id="editCodeModal" tabindex="-1" role="dialog" aria-labelledby="editCodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Edit Code</h4>
+            </div>
+
+            <div class="container" style="width: 100%; padding-bottom: 0px !important">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row" style="margin-top: 16px;">
+                            <div class="col-md-2">
+                                Code
+                            </div>
+                            <div class="col-md-2">
+                                Init Seconds
+                            </div> 
+                            <div class="col-md-2">
+                                Increment Seconds
+                            </div>  
+                            <div class="col-md-2">
+                                Rate
+                            </div>                                                           
+                            <div class="col-md-4">
+                                Description
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group required">
+                                    <div class="col">
+                                        <input class="form-control"
+                                            name="code"
+                                            data-bind="value: editableItem.code" 
+                                            required type="text">
+                                    </div>
+                                </div>                        
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="col">
+                                        <input class="form-control" 
+                                            data-bind="value: editableItem.init_seconds" 
+                                            type="text">
+                                    </div>
+                                </div>                    
+                            </div>  
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="col">
+                                        <input class="form-control" 
+                                            data-bind="value: editableItem.increment_seconds" 
+                                            type="text">
+                                    </div>
+                                </div>                                           
+                            </div>     
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="col">
+                                        <input class="form-control" 
+                                            data-bind="value: editableItem.rate" 
+                                            type="text">
+                                    </div>
+                                </div>                                          
+                            </div>                                                       
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col">
+                                        <input class="form-control" 
+                                            data-bind="value: editableItem.description" 
+                                            type="text">
+                                    </div>
+                                </div>                                          
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" 
+                    data-bind="click: onEditItemClick, disable: isSubmitting()">
+                    <span data-bind="text: isSubmitting() ? 'Saving...' : 'Save'"></span>
+                </button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete code -->
+    <div class="modal fade" id="deleteCodeModal" tabindex="-1" role="dialog" aria-labelledby="deleteCodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Delete Code</h4>
+            </div>
+
+            <div class="container" style="width: 100%; padding-bottom: 0px !important">
+            <div class="panel panel-default">
+            <div class="panel-body">
+                <h3>Are you sure?</h3><br/>
+                <p>Code <b data-bind="text: removableItem() ? removableItem().code : ''"></b> will be deleted.</p>
+            </div>
+            </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" 
+                    data-bind="click: onDeleteItemClick, disable: isSubmitting">
+                    <span data-bind="text: isSubmitting() ? 'Deleting...' : 'Delete'"></span>
+                </button>
+            </div>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript">
-        const pageSize = 10;
-        const codes = @if ($telcorates) {!! $telcorates->codes !!} @else null @endif;
+        const telcoratePublicId = @if ($telcorates) {{ $telcorates->public_id }} @else null @endif;
+        const codes = null;
         let model = null;
+        const codesApiUrl = @if (!empty($telcoCodesUrl)) '{{ $telcoCodesUrl }}' @else null @endif;
 
         function CodeViewModel() {
             this.codes = ko.observableArray([]);
-            this.searchText = ko.observable('');
+            this.searchText = ko.observable('').extend({ rateLimit: 500 });
             this.isCsvUploading = ko.observable(false);
             this.isSubmitting = ko.observable(false);
+            this.newItem = {
+              code: ko.observable(),
+              init_seconds: ko.observable(),
+              increment_seconds: ko.observable(),
+              rate: ko.observable(),
+              description: ko.observable(),
+            };
+            this.editableItem = {
+                id: ko.observable(),
+                code: ko.observable(),
+                init_seconds: ko.observable(),
+                increment_seconds: ko.observable(),
+                rate: ko.observable(),
+                description: ko.observable(),
+            };
+            this.removableItem = ko.observable();
 
             this.addCode = (code = null, checkValidity = true) => {
-                if (this.lastPage() > 0) {
-                    this.page(this.lastPage());
-                }
                 if (checkValidity && this.codes().length
                     && $.grep($('#telcorateForm [name^="codes"]'), item => !item.checkValidity()).length) {
                     $('#telcorateForm button[type=submit]')[0].click();
@@ -205,29 +404,114 @@
                 });
             };
 
-            this.removeCode = (item) => {
-                this.codes.remove(item);
-                if (!this.codes().length) {
-                    this.addCode();
+            this.onAddCodeClick = () => {
+                this.newItem.code('');
+                this.newItem.init_seconds('');
+                this.newItem.increment_seconds('');
+                this.newItem.rate('');
+                this.newItem.description('');
+                $('#addCodeModal').modal('show');
+            };
+
+            this.onAddItemClick = () => {
+                const codeInputEl = document.getElementById('addCodeModal').querySelector('input[name="code"]');
+                if (codeInputEl.checkValidity()) {
+                    this.isSubmitting(true);
+                    $.ajax(
+                        {   
+                            url: codesApiUrl,
+                            method: 'POST',
+                            data: this.newItem,
+                        }
+                    )
+                    .done((response) => {
+                        this.loadPage();
+                    })
+                    .fail(( jqXHR, textStatus ) => {
+                        console.log('error during request:', jqXHR.statusText);
+                    })
+                    .always(() => {
+                        this.isSubmitting(false);
+                        $('#addCodeModal').modal('hide');
+                    });
+                } else {
+                    codeInputEl.reportValidity();
                 }
             }
 
-            this.filteredCodes = ko.computed(() => {
-                const searchText = this.searchText();
-                if (!searchText) {
-                    return this.codes();
-                }
-                return ko.utils.arrayFilter(this.codes(), item => 
-                        item.code && item.code.indexOf(searchText) !== -1
-                        || item.rate && item.rate.toString().indexOf(searchText) !== -1
-                        || item.description && item.description.indexOf(searchText) !== -1
-                        || (!item.id && !item.code && !item.init_seconds 
-                            && !item.rate && !item.description) // added item
+            this.editCode = (item) => {
+                this.editableItem.id(item.id);
+                this.editableItem.code(item.code);
+                this.editableItem.init_seconds(item.init_seconds);
+                this.editableItem.increment_seconds(item.increment_seconds);
+                this.editableItem.rate(item.rate);
+                this.editableItem.description(item.description);
+                $('#editCodeModal').modal('show');
+            };
+
+            this.onEditItemClick = () => {
+                const codeInputEl = document.getElementById('editCodeModal').querySelector('input[name="code"]');
+                if (codeInputEl.checkValidity()) {
+                    this.isSubmitting(true);
+                    $.ajax(
+                        {   
+                            url: codesApiUrl,
+                            method: 'PUT',
+                            data: this.editableItem,
+                        }
                     )
-            });
+                    .done((response) => {
+                        this.loadPage();
+                    })
+                    .fail(( jqXHR, textStatus ) => {
+                        console.log('error during request:', jqXHR.statusText);
+                    })
+                    .always(() => {
+                        this.isSubmitting(false);
+                        $('#editCodeModal').modal('hide');
+                    });
+                } else {
+                    codeInputEl.reportValidity();
+                }
+            }
+
+            this.removeCode = (item) => {
+                if (item.id) {
+                    this.removableItem(item);
+                    $('#deleteCodeModal').modal('show');
+                } else {
+                    this.codes.remove(item);
+                    if (!this.codes().length) {
+                        this.addCode();
+                    }
+                }
+            }
+
+            this.onDeleteItemClick = () => {
+                this.isSubmitting(true);
+                $.ajax(
+                    {   
+                        url: codesApiUrl,
+                        method: 'DELETE',
+                        data: {
+                            id: this.removableItem().id
+                        },
+                    }
+                )
+                .done((response) => {
+                    this.loadPage();
+                })
+                .fail(( jqXHR, textStatus ) => {
+                    console.log('error during request:', jqXHR.statusText);
+                })
+                .always(() => {
+                    this.isSubmitting(false);
+                    $('#deleteCodeModal').modal('hide');
+                });
+            }
 
             this.handleAfterAllRender = (node) => {
-                if ($('#rowsContainer').children().length === this.filteredCodes().length) {
+                if ($('#rowsContainer').children().length === this.codes().length) {
                     $( document ).trigger( "codesRenderingCompleted");
                 }
             }
@@ -235,9 +519,9 @@
             this.initPaginator = () => {
                 // Pagination model
                 this.page = ko.observable(1);
-                this.total = ko.computed(() => this.filteredCodes().length);
+                this.total = ko.observable(0);
                 this.maxPages = ko.observable(5);
-                this.pageSize = ko.observable(pageSize);
+                this.pageSize = ko.observable(10);
                 this.directions = ko.observable(true);
                 this.boundary = ko.observable(true);
                 this.lastPage = ko.computed(() => Math.ceil(this.total() / this.pageSize()));
@@ -255,7 +539,11 @@
                 });
 
                 this.searchText.subscribe(() => {
-                    this.page(1);
+                    this.loadPage(1);
+                });
+
+                this.page.subscribe((value) => {
+                    this.loadPage();
                 });
             }
 
@@ -276,9 +564,14 @@
 
                         this.fileReader.onload = (event) => {
                             const csv = event.target.result;
-                            parseCsv(csv).forEach(code => this.addCode(code, false));
+                            const codes = parseCsv(csv);
+                            if (codes.length) {
+                                this.uploadCodes(codes);
+                            } else {
+                                this.isCsvUploading(false);
+                            }
                             $('#uploadCsv')[0].value = null;
-                            this.isCsvUploading(false);
+                            
                         };
                         this.fileReader.onerror = () => {
                             this.uploadState = 'error';
@@ -291,13 +584,49 @@
                 return true;
             }
 
-            this.initPaginator();
-            if (codes && codes.length) {
-                codes.forEach(code => this.addCode(code));
-                this.page(1);
-            } else {
-                this.addCode();
+            this.uploadCodes = (codes) => {
+                this.isSubmitting(true);
+                    $.ajax(
+                        {   
+                            url: codesApiUrl + '/bulk-upload',
+                            method: 'POST',
+                            data: {
+                                codes
+                            },
+                        }
+                    )
+                    .done((response) => {
+                        this.loadPage();
+                    })
+                    .fail(( jqXHR, textStatus ) => {
+                        console.log('error during request:', jqXHR.statusText);
+                    })
+                    .always(() => {
+                        this.isSubmitting(false);
+                        this.isCsvUploading(false);
+                    });
             }
+
+            this.loadPage = (page = this.page()) => {
+                this.page(page);
+                $.get(codesApiUrl, {
+                    page: this.page(),
+                    search: this.searchText()
+                }, (data) => {
+                    this.total(data.total);
+                    this.pageSize(data.per_page);
+                    const codes = data.data;
+                    this.codes.removeAll();
+                    if (codes && codes.length) {
+                        codes.forEach(code => this.addCode(code));
+                    } else {
+                        this.addCode();
+                    }
+                })
+            }
+
+            this.initPaginator();
+            this.loadPage();
              
         }
         
@@ -309,7 +638,6 @@
         })
 
         $('form').submit(function(event) {
-            console.log('submit');
             const form = this;
             event.preventDefault();
             model.isSubmitting(true);            
@@ -333,7 +661,7 @@
         function parseCsv(data) {
             const codes = [];
             data.split('\n').forEach((item) => {
-                const line = item.split(',');
+                const line = item.split(/,|;/);
                 if (line.length && line[0]) {
                     codes.push({
                         code: line[0],
