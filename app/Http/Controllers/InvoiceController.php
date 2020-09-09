@@ -327,7 +327,14 @@ class InvoiceController extends BaseController
 
         $telcorates = Telcorates::scope()->orderBy('name')->get();
 
-        $products = $products->merge($telcopackages)->merge($telcorates);
+        foreach ($telcopackages as $item) {
+           $products->push($item);
+        }
+        foreach ($telcorates as $item) {
+            $products->push($item);
+         }
+        // $products = $products->merge($telcopackages)->merge($telcorates);
+        // $products = $products->union($telcopackages)->union($telcorates);
 
         $invoiceCategories = [
             INVOICE_ITEM_CATEGORY_ORDINARY => Invoice::$invoiceCategories[INVOICE_ITEM_CATEGORY_ORDINARY]
